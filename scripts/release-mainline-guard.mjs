@@ -8,8 +8,8 @@ const {
 } = require('../lib/release-mainline');
 
 try {
-  const tag = process.env.npm_config_tag || 'v1';
-  if (tag !== 'v1') throw new Error('V1_RELEASE_CHANNEL_REQUIRED: V1 维护包只能发布到 v1，不能改写 latest');
+  const tag = process.env.npm_config_tag || 'legacy-v1';
+  if (tag !== 'legacy-v1') throw new Error('V1_RELEASE_CHANNEL_REQUIRED: V1 维护包只能发布到 legacy-v1，不能改写 latest');
   const options = { cwd: process.cwd() };
   const source = prepareReleaseSourceRevision(options);
   const integration = assertReleaseSourceIntegrated(source, options);

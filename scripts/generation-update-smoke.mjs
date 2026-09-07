@@ -12,7 +12,7 @@ try {
   writeFileSync(join(root, 'old/app-workspace.config.ts'), 'export default {}');
   writeFileSync(join(root, 'old/package.json'), JSON.stringify({ dependencies: { openxiangda: '1.0.267' } }));
   const selection = resolveUpdateTarget({ cwd: join(root, 'old/src') });
-  assert.equal(selection.target, 'workspace'); assert.equal(selection.channel, 'v1');
+  assert.equal(selection.target, 'workspace'); assert.equal(selection.channel, 'legacy-v1');
   const command = buildGenerationUpdateCommand(selection, '1.0.268');
   assert.ok(!command.args.includes('-g')); assert.ok(command.args.includes('--save-prod'));
   assert.throws(() => buildGenerationUpdateCommand(selection, '2.0.0'), /GENERATION_MISMATCH/);

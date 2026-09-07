@@ -11,7 +11,7 @@
     "在 V1 项目内执行 update 默认更新项目依赖，使用 v1 维护渠道并固定具体版本。",
     "全局入口更新单独使用 --target launcher，检查 Node.js 24 要求并安装统一 V2 入口。",
     "V1 主 Skill 使用 openxiangda-v1 名称，安装时保留统一入口和 V2 技能。",
-    "V1 发布仅允许 v1 渠道，防止维护版覆盖 V2 的 latest。"
+    "V1 发布仅允许 legacy-v1 渠道，防止维护版覆盖 V2 的 latest。"
   ],
   "affectedUsers": [
     "维护既有 V1 项目的开发者",

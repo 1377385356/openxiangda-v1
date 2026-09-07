@@ -215,7 +215,7 @@
     "node": ">=18"
   },
   "publishConfig": {
-    "tag": "v1",
+    "tag": "legacy-v1",
     "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
@@ -241,7 +241,7 @@
       "在 V1 项目内执行 update 默认更新项目依赖，使用 v1 维护渠道并固定具体版本。",
       "全局入口更新单独使用 --target launcher，检查 Node.js 24 要求并安装统一 V2 入口。",
       "V1 主 Skill 使用 openxiangda-v1 名称，安装时保留统一入口和 V2 技能。",
-      "V1 发布仅允许 v1 渠道，防止维护版覆盖 V2 的 latest。"
+      "V1 发布仅允许 legacy-v1 渠道，防止维护版覆盖 V2 的 latest。"
     ],
     "affectedUsers": [
       "维护既有 V1 项目的开发者",
@@ -266,7 +266,7 @@
       "既有 1.0.267 及更早版本的全局更新命令可能安装 latest；新统一入口仍按旧项目标记调用 V1 引擎。"
     ],
     "issues": [],
-    "sha256": "8d328e03c2238c275424a05097bf70a26abb22de9482b651ddd14eacf3f250db",
+    "sha256": "7aaa99d31b91f725b785259031daaeaf3841cb18a95f6155e43009f1f601e6c9",
     "url": "https://github.com/1377385356/openxiangda-v1/releases/tag/v1.0.268"
   }
 }
