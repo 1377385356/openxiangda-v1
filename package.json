@@ -227,5 +227,45 @@
   "homepage": "https://github.com/1377385356/openxiangda-v1",
   "bugs": {
     "url": "https://github.com/1377385356/openxiangda-v1/issues"
+  },
+  "openxiangdaRelease": {
+    "schemaVersion": "openxiangda.release-notes/v1",
+    "version": "1.0.268",
+    "title": "OpenXiangda V1 维护版 1.0.268",
+    "status": "reviewed",
+    "summary": "旧项目继续使用 V1 引擎，项目升级保持在 V1 维护渠道；同时兼容新的全局统一入口与独立的 V2 Skill。",
+    "newFeatures": [
+      "V1 工具源码从经审查的公开基线发布到独立 GitHub 仓库，并提供对应版本说明。"
+    ],
+    "fixes": [
+      "在 V1 项目内执行 update 默认更新项目依赖，使用 v1 维护渠道并固定具体版本。",
+      "全局入口更新单独使用 --target launcher，检查 Node.js 24 要求并安装统一 V2 入口。",
+      "V1 主 Skill 使用 openxiangda-v1 名称，安装时保留统一入口和 V2 技能。",
+      "V1 发布仅允许 v1 渠道，防止维护版覆盖 V2 的 latest。"
+    ],
+    "affectedUsers": [
+      "维护既有 V1 项目的开发者",
+      "已经安装全局统一入口的 V1 用户"
+    ],
+    "compatibility": {
+      "node": ">=18；全局 V2 统一入口需要 >=24",
+      "workspaceGenerations": [
+        "v1"
+      ],
+      "workspacePolicy": "沿用现有 app-workspace.config.ts、平台绑定、登录态、业务数据及流程。",
+      "platformPolicy": "本次维护不改变平台协议或部署状态。"
+    },
+    "upgradeSteps": [
+      "项目依赖通过 v1 维护渠道升级，例如 npm install --save-dev --save-exact openxiangda@1.0.268；按项目实际包管理器和依赖类型调整。",
+      "安装全局 V2 统一入口后，进入旧项目运行 openxiangda version --json 核对 V1 引擎来源。",
+      "刷新对应项目的 V1 Skill，检查依赖与锁文件差异，并执行原有项目测试。"
+    ],
+    "knownLimitations": [
+      "本版本不会自动把 V1 应用迁移到 V2；跨代迁移需要独立设计、映射、演练和批准。",
+      "既有 1.0.267 及更早版本的全局更新命令可能安装 latest；新统一入口仍按旧项目标记调用 V1 引擎。"
+    ],
+    "issues": [],
+    "sha256": "4c45adc96663fb09cdc60b3d11b3ce49f4490409ff27ec353d4c1a6153e5b036",
+    "url": "https://github.com/1377385356/openxiangda-v1/releases/tag/v1.0.268"
   }
 }
