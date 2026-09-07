@@ -1,6 +1,6 @@
 ---
 name: openxiangda-v1
-description: "Use OpenXiangda for private low-code platform work: app workspaces, forms, pages, resources, functions, automations, workflows, permissions, publishing, deployment, diagnosis, profiles, and the openxiangda CLI."
+description: "Maintain existing OpenXiangda V1 workspaces: forms, pages, resources, workflows, permissions, publishing and diagnosis. New applications default to V2; assess V2 adoption for V1 projects still in testing when capability coverage and migration cost permit."
 ---
 
 <!-- OpenXiangda-Policy-Version: 7 -->
@@ -13,9 +13,11 @@ This file is a router and safety card. Read only the one or two subskills select
 
 ## Select the runtime generation first
 
-If the workspace contains `openxiangda.config.ts`, `apps/web`, and `apps/server`, it is a platform-2.0 application. Stop this 1.x resource flow and use the independently released `$openxiangda-v2` unified skill. The 2.0 CLI operates on one immutable application package and does not use SDD or per-resource publishing.
+If the nearest workspace contains `openxiangda.config.ts` or `openxiangda-app.config.ts`, it is a platform-2.0 application; a Nest server is optional. Stop this 1.x resource flow and use the independently released `$openxiangda-v2` skill. The 2.0 CLI operates on one immutable application package and does not use SDD or per-resource publishing.
 
 If the workspace contains `app-workspace.config.ts`, forms/pages/resource manifests, or an existing 1.x state directory, continue with this router. Never migrate a stable 1.x application merely because platform 2.0 is available.
+
+For an existing V1 project, proactively check whether V2 covers its required capabilities, whether it is still in testing, and whether migration cost is manageable. When those conditions hold, recommend V2 first and explain the benefit, rebuild scope and verification cost. Use the unified entry's `openxiangda migrate assess --to v2` for source pointers; confirm the project design, data/workflow mapping, acceptance and rollback before implementing migration. Keep unknown conditions explicit and continue current maintenance with the matching engine until migration is authorized.
 
 ## 1.x Delivery V2 is the normal 1.x release path
 
