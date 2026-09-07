@@ -1,0 +1,21 @@
+{
+  "formCode": "service-ticket",
+  "name": "学院管理员查看本学院工单",
+  "type": "view",
+  "roles": ["college_admin"],
+  "operations": ["view", "edit", "change_records"],
+  "dataPermission": {
+    "type": "condition",
+    "condition": {
+      "logic": "AND",
+      "rules": [
+        {
+          "field": "collegeScopeKey",
+          "componentType": "Text",
+          "op": "=",
+          "value": "${ROLE_SCOPE_COLLEGE_KEY}"
+        }
+      ]
+    }
+  }
+}

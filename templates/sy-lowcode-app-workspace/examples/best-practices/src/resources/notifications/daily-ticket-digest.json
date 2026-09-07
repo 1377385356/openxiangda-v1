@@ -1,0 +1,24 @@
+{
+  "templates": [
+    {
+      "code": "daily_ticket_digest",
+      "name": "每日工单摘要",
+      "variables": ["title", "count", "riskCount"],
+      "channelsConfig": {
+        "inapp": {
+          "enabled": true,
+          "title": "{{title}}",
+          "content": "今日待处理 {{count}} 条，其中超时风险 {{riskCount}} 条"
+        }
+      }
+    }
+  ],
+  "typeConfigs": [
+    {
+      "notificationType": "daily_ticket_digest",
+      "templateCode": "daily_ticket_digest",
+      "enabled": true,
+      "priority": 0
+    }
+  ]
+}

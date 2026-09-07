@@ -1,0 +1,6 @@
+.openxiangda/
+node_modules/
+.codegraph/
+packages/sdk/dist/
+.env
+.codegraph/

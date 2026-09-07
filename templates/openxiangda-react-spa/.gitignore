@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.vite/
+.env.local
+.env.*.local
+.openxiangda/build-cache.json
+.openxiangda/build-cache.json.lock
+.openxiangda/build-cache.cli-v4.json
+.openxiangda/build-cache.cli-v4.json.lock
+.openxiangda/worktree-owner.json
+.openxiangda/worktree-owner.json.lock
+.openxiangda/worktree-managed.json
+.openxiangda/candidates/
+.openxiangda/releases/

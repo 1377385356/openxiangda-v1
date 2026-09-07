@@ -1,0 +1,24 @@
+---
+description: src/forms/** — Use openxiangda-form skill
+globs: src/forms/**/*
+alwaysApply: false
+---
+
+# OpenXiangda React SPA Form Files
+
+Editing `src/forms/<formCode>/`. Use the **`openxiangda-form`** skill.
+
+- Keep field/schema rules in `schema.ts` and presentation in `page.tsx`.
+- Prefer OpenXiangda platform fields, then `antd` / `antd-mobile`; do not use native inputs, hand-written uploaders, pickers, or user/department selectors.
+- Option fields require non-empty `options`; linked data uses `SelectField` with `optionSource.type: "linkedForm"`.
+- Top-level `schema.rules` is only for `FormEffect[]`; validation belongs to field `rules`.
+- Do not recreate platform system fields. Use `behavior: "HIDDEN"` + `valueSync` for derived or permission keys.
+
+Release with exact scope:
+
+```bash
+openxiangda resource plan form-setting --only <formCode> --profile <name>
+openxiangda resource publish form-setting --only <formCode> --change <change> --profile <name>
+```
+
+Managed production activation only occurs through candidate → preproduction deploy/test → promotion of the same candidate.

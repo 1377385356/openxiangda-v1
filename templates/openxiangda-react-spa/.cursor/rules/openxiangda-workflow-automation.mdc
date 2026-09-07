@@ -1,0 +1,26 @@
+---
+description: src/{workflows,automations,js-code-nodes,functions}/** — Use openxiangda-workflow-automation skill
+globs: src/{workflows,automations,js-code-nodes,functions}/**/*
+alwaysApply: false
+---
+
+# OpenXiangda React SPA Workflow / Automation / Function Files
+
+Use the **`openxiangda-workflow-automation`** skill for workflows, automations, JS_CODE, and App Functions.
+
+- Ordinary lifecycle state changes use a status field, domain state machine, and automation; create workflows only for real approval semantics.
+- Prefer App Functions for reusable backend logic. JS_CODE is for cross-form, batch, process, platform API, external HTTP, and complex orchestration.
+- Keep UI interactions, normal validation, and display logic in React.
+- Log important backend steps with `ctx.logger`; obtain third-party credentials only through declared `secretRefs`.
+- Never copy workflow, automation, or function IDs across profiles.
+
+Build and release with exact scope:
+
+```bash
+pnpm typecheck:js-code
+pnpm build-js-code --script <code>
+openxiangda resource plan <workflow|automation|function> --only <code> --profile <name>
+openxiangda resource publish <workflow|automation|function> --only <code> --change <change> --profile <name>
+```
+
+Managed production activation only occurs through candidate → preproduction deploy/test → promotion of the same candidate.

@@ -1,0 +1,25 @@
+{
+  "version": "v3",
+  "nodes": [
+    { "id": "start", "type": "start", "data": { "label": "开始" } },
+    {
+      "id": "daily_digest",
+      "type": "js_code",
+      "data": {
+        "label": "生成每日工单摘要",
+        "runtimeMode": "trusted_node",
+        "sourceType": "file_snapshot",
+        "scriptCode": "daily_ticket_digest",
+        "sourceFile": {
+          "localPath": "src/js-code-nodes/daily_ticket_digest/index.ts"
+        },
+        "timeout": 30000
+      }
+    },
+    { "id": "end", "type": "end", "data": { "label": "结束" } }
+  ],
+  "edges": [
+    { "id": "e_start_digest", "source": "start", "target": "daily_digest" },
+    { "id": "e_digest_end", "source": "daily_digest", "target": "end" }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "type": "scheduled",
+  "appType": "APP_XXX",
+  "enabled": true,
+  "scheduleType": "fixed_time",
+  "fixedTime": {
+    "cronExpression": "0 0 9 * * *"
+  }
+}

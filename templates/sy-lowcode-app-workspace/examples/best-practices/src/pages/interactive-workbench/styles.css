@@ -1,0 +1,24 @@
+.bp-workbench {
+  display: grid;
+  gap: 24px;
+  min-height: 100%;
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.bp-workbench__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bp-workbench__grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.bp-workbench__panel {
+  width: 100%;
+}

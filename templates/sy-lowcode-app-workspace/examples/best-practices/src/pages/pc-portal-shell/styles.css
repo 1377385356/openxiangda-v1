@@ -1,0 +1,35 @@
+.bp-pc-shell {
+  min-height: 100%;
+  background: #f8fafc;
+}
+
+.bp-pc-shell__sider {
+  border-right: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.bp-pc-shell__brand {
+  margin: 0;
+  padding: 24px;
+}
+
+.bp-pc-shell__content {
+  padding: 24px;
+}
+
+.bp-pc-shell__module {
+  display: grid;
+  gap: 16px;
+}
+
+.bp-pc-shell__card,
+.bp-portal-metric {
+  border-radius: 8px;
+}
+
+.bp-portal-metric__value {
+  margin: 8px 0;
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 600;
+}

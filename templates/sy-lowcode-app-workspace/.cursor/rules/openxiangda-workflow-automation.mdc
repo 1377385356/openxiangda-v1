@@ -1,0 +1,21 @@
+---
+description: src/{workflows,automations,js-code-nodes}/** — Use openxiangda-workflow-automation skill
+globs: src/{workflows,automations,js-code-nodes}/**/*
+alwaysApply: false
+---
+
+# OpenXiangda Workflow / Automation / JS_CODE
+
+Editing one of:
+- `src/workflows/<code>/workflow.ts`        # 代码优先工作流
+- `src/automations/<code>/index.ts`         # automation_code_ts (推荐)
+- `src/js-code-nodes/<code>/index.ts`       # JS_CODE V2 trusted_node
+
+Use the **`openxiangda-workflow-automation`** skill.
+
+Boundary: **大多数业务流转不是 workflow**。`pending → processing → resolved → closed` 用表单 `status` 字段 + 状态机 + automation。仅有真审批语义（审批人 / 任务 / 同意/驳回 / 节点权限 / 流程记录）才创建 workflow。
+
+JS_CODE 适用：跨表查询、批量更新、终止流程、平台 API、外部 HTTP。**不适用**：UI 交互、普通校验、展示逻辑。
+
+Build: `pnpm build-js-code --script <code>`（先 `tsc` 再打包）。
+Publish: `openxiangda workflow|automation validate|create|publish --profile <name>`。

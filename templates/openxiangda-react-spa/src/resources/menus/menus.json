@@ -1,0 +1,22 @@
+{
+  "menus": [
+    {
+      "code": "admin_dashboard",
+      "name": "工作台",
+      "type": "nav",
+      "routeCode": "admin.dashboard",
+      "path": "/view/:appType/admin",
+      "icon": "Home",
+      "sortOrder": 10
+    },
+    {
+      "code": "admin_login_logs",
+      "name": "登录日志",
+      "type": "nav",
+      "routeCode": "admin.login_logs",
+      "path": "/view/:appType/admin/login-logs",
+      "icon": "ShieldCheck",
+      "sortOrder": 20
+    }
+  ]
+}

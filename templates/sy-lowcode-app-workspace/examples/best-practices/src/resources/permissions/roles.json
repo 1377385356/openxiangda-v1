@@ -1,0 +1,17 @@
+[
+  {
+    "code": "app_admin",
+    "name": "应用管理员",
+    "description": "可以查看和处理全部业务数据"
+  },
+  {
+    "code": "college_admin",
+    "name": "学院管理员",
+    "description": "通过业务角色表动态维护，按学院权限键隔离数据"
+  },
+  {
+    "code": "class_owner",
+    "name": "班级负责人",
+    "description": "通过业务角色表动态维护，按班级权限键隔离数据"
+  }
+]

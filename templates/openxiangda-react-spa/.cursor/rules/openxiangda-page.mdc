@@ -1,0 +1,25 @@
+---
+description: src/pages/** — Use openxiangda-page skill
+globs: src/pages/**/*
+alwaysApply: false
+---
+
+# OpenXiangda React SPA Page Files
+
+Editing `src/pages/`. Use the **`openxiangda-page`** skill.
+
+- Keep routes in `src/app/router.tsx` and navigation in `src/app/navigation.ts`.
+- Split complex pages into thin views, `domain/`, `shared/{services,hooks}/`, `components/`, and styles.
+- Use server pagination and structured `filterGroup`; never fetch an oversized page and filter in the browser.
+- Prefer OpenXiangda platform components for platform data fields and `antd` / `antd-mobile` for ordinary UI.
+- Do not use native form controls, hand-written pickers/uploaders, or frontend-only authorization.
+
+Build and stage:
+
+```bash
+pnpm typecheck
+pnpm build
+openxiangda runtime deploy --no-activate --change <change> --profile <name>
+```
+
+Managed production activation only occurs through candidate → preproduction deploy/test → promotion of the same candidate.

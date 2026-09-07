@@ -1,0 +1,40 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "openxiangda": [
+        "../../packages/sdk/src/components/index.ts",
+        "node_modules/openxiangda"
+      ],
+      "openxiangda/runtime": [
+        "../../packages/sdk/src/runtime/index.ts",
+        "node_modules/openxiangda/runtime"
+      ],
+      "openxiangda/build": [
+        "../../packages/sdk/src/build/index.ts",
+        "node_modules/openxiangda/build"
+      ],
+      "openxiangda/antd-theme": [
+        "../../packages/sdk/src/styles/antd-theme.ts",
+        "node_modules/openxiangda/antd-theme"
+      ]
+    }
+  },
+  "include": ["src", "app-workspace.config.ts", "vite.config.ts"]
+}

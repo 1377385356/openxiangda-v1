@@ -1,0 +1,48 @@
+{
+  "version": "v3",
+  "nodes": [
+    { "id": "start", "type": "start", "data": { "label": "提交报销" } },
+    {
+      "id": "amount_branch",
+      "type": "condition",
+      "data": {
+        "label": "金额判断"
+      }
+    },
+    {
+      "id": "manager_approval",
+      "type": "approval",
+      "data": {
+        "label": "直属主管审批"
+      }
+    },
+    {
+      "id": "finance_approval",
+      "type": "approval",
+      "data": {
+        "label": "财务审批"
+      }
+    },
+    {
+      "id": "notify",
+      "type": "work_notification",
+      "data": {
+        "label": "审批结果通知"
+      }
+    },
+    { "id": "end", "type": "end", "data": { "label": "结束" } }
+  ],
+  "edges": [
+    { "id": "e_start_branch", "source": "start", "target": "amount_branch" },
+    { "id": "e_branch_manager", "source": "amount_branch", "target": "manager_approval" },
+    { "id": "e_manager_finance", "source": "manager_approval", "target": "finance_approval" },
+    { "id": "e_finance_notify", "source": "finance_approval", "target": "notify" },
+    { "id": "e_notify_end", "source": "notify", "target": "end" }
+  ],
+  "flowConfig": {
+    "manager_approval": [
+      { "fieldId": "amount", "fieldBehavior": "READONLY" },
+      { "fieldId": "remark", "fieldBehavior": "NORMAL" }
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+---
+description: src/resources/** — Resource manifests, use logical codes only
+globs: src/resources/**/*
+alwaysApply: false
+---
+
+# OpenXiangda Resource Manifests
+
+Editing engineering-managed manifests under `src/resources/`. **All platform IDs are resolved by the CLI**; only logical `code` values go here.
+
+| Path | Skill |
+|---|---|
+| `connectors/<code>.json` | `openxiangda-page` |
+| `data-views/<code>.json` | `openxiangda-form` |
+| `notifications/<code>.json` | `openxiangda-page` / `-workflow-automation` |
+| `workflows/<code>/` | `openxiangda-workflow-automation` |
+| `automations/<code>/` | `openxiangda-workflow-automation` |
+| `roles/<code>.json` | `openxiangda-permission-settings` |
+| `permissions/page-groups/<code>.json` | `openxiangda-permission-settings` |
+| `permissions/form-groups/<formCode>/<code>.json` | `openxiangda-permission-settings` |
+| `settings/forms/<formCode>.json` | `openxiangda-permission-settings` |
+| `menus/<code>.json` | `openxiangda-app` |
+
+See `references/resource-manifest-cheatsheet.md` for copy-paste skeletons.
+
+Commands: `openxiangda resource validate|plan|publish <type> --only <codes> --profile <name>`; use `--code <code>` for one resource and `pull` only for an intentional platform-to-local sync.
+
+`resource plan` and publish dry-runs are strictly GET/HEAD-only. On `READ_ONLY_AUTH_REQUIRED`, run `openxiangda auth refresh --profile <name>` or log in again before retrying; never refresh inside the plan.
+
+Exact `--only/--code` selectors apply before manifest/source analysis and JS_CODE build. Touch only selected targets plus transitive/shared/ambient dependencies; omit selectors only for intentional full-workspace work.
+
+App Function manifests may contain only logical names in top-level `secretRefs`; use `function_v2` / `trusted_node_v2`, resolve values with `ctx.secrets.get(name)`, and manage values only with `openxiangda secret ... --value-stdin --change ... --profile ...`. Values never belong in Git, `.env`, manifests, source, builds, plans, logs, or errors.
+
+When a Function/Automation enters scope only through source changes, publishing uses a server-side source-field PATCH and preserves online bindings, contracts, metadata, trigger/view configuration, and enabled/published state. A new source-free Automation with a complete `definitionJson.version="v3"` automatically uses manifest create; replacing an existing whole manifest requires `--replace-manifest --reason "..."`. Formal promotion freezes the clean publish HEAD separately from the change/remote baseline and preflights the whole set; `SOURCE_BASE_DIVERGED`, `RELEASE_SOURCE_BEHIND_MAIN`, and `RESOURCE_FIELD_CONFLICT` require reconciliation. After activation, merge/push the frozen SHA, verify `release integration-status`, then run normal `release end`.
+
+Before editing `roles`, `permissions/page-groups`, or `permissions/form-groups` for account/role/data-scope/RBAC/query-param authorization work, run `openxiangda design gates --topic permissions --json`, choose the permission mode, and write the permission matrix.
+
+If a `roles/<code>.json` role can create roles, assign members, grant API permissions, maintain permission groups, or manage organization accounts, it must declare `apiPermissionCodes`; a business role name alone does not grant backend API permission.
+
+Forbidden: 把 `formUuid` / `pageId` / `workflowId` 等平台 ID 写进 manifest；把 API key / token / secret / authorization 写进 manifest；data view 用作单表 CRUD / linkedForm / 写回 / 强实时；只靠 query 参数、前端隐藏按钮、硬编码角色、mock 权限或 `PermissionBoundary` 作为敏感授权；管理型角色缺少 `app:role:manage` / `app:page-permission-group:manage` / `app:form-permission-group:manage` / `app:organization:manage`；page 源里 hardcode 通知或 connector URL。

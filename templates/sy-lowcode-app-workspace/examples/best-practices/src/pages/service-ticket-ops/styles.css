@@ -1,0 +1,35 @@
+.bp-ticket-ops {
+  min-height: 100%;
+  padding: 24px;
+  background: #f8fafc;
+}
+
+.bp-ticket-ops__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.bp-ticket-ops__title {
+  margin: 0;
+}
+
+.bp-ticket-detail {
+  display: grid;
+  gap: 16px;
+}
+
+.bp-ticket-detail__description {
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.bp-query-state {
+  display: grid;
+  min-height: 120px;
+  place-items: center;
+}

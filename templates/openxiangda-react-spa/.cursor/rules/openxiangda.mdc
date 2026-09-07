@@ -1,0 +1,68 @@
+---
+description: OpenXiangda React SPA workspace strong constraints
+alwaysApply: true
+---
+
+# OpenXiangda React SPA Rule
+
+This is an OpenXiangda React SPA workspace using Delivery V2. See [DELIVERY.md](mdc:DELIVERY.md) and [AGENTS.md](mdc:AGENTS.md). Low-level V1 resource/runtime commands are compatibility tools.
+
+## Hard route
+
+| User says | Command |
+|---|---|
+| publish / deploy | `openxiangda check --environment preproduction` → `openxiangda deploy preproduction` |
+| formal promotion | `openxiangda deploy production --package <packageDigest>` |
+| status / retry | `openxiangda status <runId>` → `openxiangda retry <runId>` |
+| rollback | `openxiangda rollback production --to <appReleaseId>` |
+| diagnose | `openxiangda doctor --profile <name> --json` |
+| external backend Open API | `openxiangda-open-api` + `openxiangda open-api spec describe ...` |
+
+## Always
+
+- Delivery V2 derives exact scope and does not require SDD, Git clean, `--change`, `--only`, candidate, or ship.
+- Treat `check --json` as the authoritative exact delta and execution plan. Deletions and unsealed third-party build dependencies fail before writes; package execution uses only the CLI toolchain and never links workspace `node_modules`. `status`/`retry` auto-locate the environment, while retry fences the old attempt and replays only cross-machine local Form bindings. Runtime build IDs combine the Runtime layer and sealed package digests; only an exact same-package `uploaded` release with matching content, source, and parent may be reused, and immutable storage is never overwritten.
+- Writes and deploys must pass `--profile <name>` explicitly.
+- Architecture-class work is plan-gated: run `openxiangda design gates --topic <code> --json` and wait for confirmation.
+- Give every task an isolated worktree/branch and one explicit development change; feature worktrees never publish. Merge approved commits to the remote default branch, create one `sdd bundle <release-change> --changes ...`, commit/push it, then publish once from the synchronized clean main/master checkout.
+- Close tasks from canonical main only. Review `openxiangda workspace cleanup`, then run `openxiangda workspace cleanup --apply` for that exact hashed `SAFE` plan; it revalidates managed worktrees under the owner lock, never picks up newly-safe entries, and never runs global `git worktree prune`. Review stale records separately.
+- L0 read-only/docs/tests need no SDD; L1 narrow reversible fixes record exact scope without a redundant second confirmation; schema, business Functions, Automation/Workflow, permissions, auth/public access, data writes, and runtime/config are L2/L3 full-SDD work. Live evidence/archive are post-release stages.
+- Very small copy/style/binding changes may use `openxiangda sdd quick <change> ...`; quick mode records exact low-risk scope without a redundant proposal/approval loop when the user already requested it.
+- SDD is streamlined by default: approval and exact structured scope are hard gates, while unfinished task/evidence/spec prose only warns. Configure `strictDocumentation: true` only when prose must block.
+- Before platform writes, run `release begin` from a clean local main/master that exactly equals the authoritative remote tip. Feature branches and unpushed mainline commits fail before any write. A clone primary may be canonicalized to the frozen repository ID only when that ID is already in `repoAliases`; otherwise release prepare fails closed. After activation, run `integration-status` and `release end`; no post-release merge is needed.
+- Managed preproduction and production targets own independent app/resource/data identities and side-effect policy. Existing workspaces use `environment attach`; only an appType-matching legacy binding may seed preproduction and production starts empty. Never direct-publish or copy IDs across them; use `openxiangda studio` to inspect candidate, evidence, and drift state. Only an explicitly authorized commissioning reclassification may use `environment swap --reason "..." --confirm-production`; it preserves app data/Release Heads and keeps side effects restricted by default.
+- Managed `release ship` always runs candidate → preproduction → production. Normally confirmation is a later invocation; an explicitly authorized emergency may put `--confirm-production` on the first invocation to run both phases in one command. The candidate seals environment/resource bindings, sourceRevision, and target-specific Runtime artifacts; a later mainline HEAD is only a safety gate, while Backend/Runtime/Root retain candidate provenance. Deployment uses no rebuild and must finish each server deployment as `succeeded`.
+- Record a failed preproduction UAT with `release fail --deployment <id> --message "..." [--code <code>] [--details-json <JSON|file>] --environment preproduction`; the CLI verifies target ownership before the audited write and rejects production or mismatched deployments.
+- Change one target's side-effect policy only with `environment policy update <preproduction|production> --side-effect-policy-json <JSON|file> --reason "..."`: run `--dry-run` first, add `--confirm-production` for production, and never use `environment swap` for this. Patch mode validates only supplied fields and preserves unrecognized historical fields; `--full-replace` validates the supplied complete target and intentionally removes omissions. `organizationWrites=explicit_capability_only` removes the environment deny but still requires `app:organization:manage`. Keep release hard gates to explicit scope/profile/target, authorization, clean pushed mainline, immutable identity, CAS/lease, and production confirmation; prose and human acceptance notes are advisory unless strict mode is configured.
+- Account/role/permission/RBAC/organization-account/query-param authorization work must run `openxiangda design gates --topic permissions --json`, choose `managed-platform-account`, `existing-platform-user-assignment`, `static-role-permission`, or `query-param-context`, and write the permission matrix.
+- Roles that create roles, assign members, grant API permissions, maintain permission groups, or manage organization accounts must declare `apiPermissionCodes`, such as `app:role:manage`, `app:page-permission-group:manage`, `app:form-permission-group:manage`, and `app:organization:manage`.
+- `src/resources/**` is the resource source of truth; use `validate -> plan -> publish`.
+- Select logical resource codes with `--only`, or one code with `--code`; type-wide/app-wide release requires an approved dependency closure.
+- Source-triggered Function/Automation publishing uses server-side source-field PATCH and preserves online bindings, contracts, metadata, trigger/view configuration, and enabled/published state. A new source-free Automation with a complete `definitionJson.version="v3"` automatically uses Backend Release manifest create without `--replace-manifest`; replacing an existing whole manifest requires `--replace-manifest --reason "..."`. On `SOURCE_BASE_DIVERGED` or `RESOURCE_FIELD_CONFLICT`, reconcile, rebuild, and re-plan.
+- A staged FormRelease for the same change may be rebound to a fresh baseline/session only after server verification of immutable/inactive/non-aborted state, identity/hash, frozen schema/formType, finalized resources, parent/base revision, and current Form head. `schemaSyncedAt` is not release evidence; never synthesize it, direct-publish the schema, or activate the Form early to bypass Workflow validation.
+- When Form settings and form permission groups ship together, stage them with one `resource publish form-setting,form-permission-group` command and exact qualified `form-setting:<code>` / `form-permission-group:<code>` selectors. SDD generation and validation share this contract and reject missing, extra, or split FormRelease scope.
+- Managed `release ship --adopt-online-baseline --adoption-reason "..."` freezes that audited intent in the private ship journal; the later `--confirm-production` automatically reuses it and rejects an explicitly different pair before any request.
+- Managed `release ship --replace-manifest --reason "..."` requires the pair, reason length >= 8, and exact Backend selectors; production confirmation repeats the exact preproduction pair, with no forwarding to Form/Workflow/Runtime/config/all stages.
+- After managed promotion, run `release integration-status --change <change> --profile <name> --check`; it recovers lineage from private `ship.json` or its referenced production/preproduction deployment execution journal, and names the missing file or field when recovery is impossible.
+- In a managed workspace with multiple targets, `function invoke` must include `--environment <target>`; verify the resolved target line on stderr before drawing conclusions from the response.
+- React routes live in `src/app/router.tsx`; frontend artifacts are deployed with `openxiangda runtime deploy`.
+- Use `AttachmentField` / `ImageField` for form-context previews, and `AttachmentPreviewList` / `ImagePreviewGrid` / `useFilePreview` for standalone custom pages. Do not fake form context, import internal preview implementations, or maintain local previewable-extension lists.
+- Backend permissions, public-access grants, and App Function role/scope checks are authoritative.
+- Public guest uploads require structured form grants with explicit upload/preview/download actions; never whitelist generic `/file/upload` or trust client-supplied app/form/field context without the signed guest claim.
+- Query parameters are context, filters, or ticket input only; they are not sensitive authorization.
+- External backends using `/dingtalk-api/v1.0` must own AK/SK and token storage; never pass those credentials into the React SPA.
+
+## Never
+
+- Do not run `lowcode-workspace publish-all`, `pnpm publish:all`, or `pnpm openxiangda:publish` directly.
+- Do not deploy without `--profile`.
+- Do not hot-patch a temporary release copy or activate a Runtime built from an unmerged task branch.
+- Do not use legacy `?publicAccess=guest`, `isRenderNav`, or workbench page parameters for new React SPA routes.
+- Do not rely on frontend-only button hiding, query-param checks, hardcoded roles, mock permissions, fake account IDs, or `PermissionBoundary` alone for real authorization.
+- Do not assign a business admin role without the role-setting API permissions needed for role/member management.
+- Do not bypass `sdk.organization` / `ctx.organization` for platform account/department writes.
+- Do not commit tokens, AK/SK, or third-party secrets.
+
+## Parallel candidates
+
+A candidate may cross unrelated later mainline commits only when its commit remains an ancestor of clean pushed mainline and all sealed input hashes remain unchanged. Each target allows one running or evidence-pending deployment; wait for the lease/slot, and keep emergency fixes on the narrow candidate → preproduction → production path.

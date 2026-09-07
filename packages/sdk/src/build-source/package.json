@@ -1,0 +1,34 @@
+{
+  "name": "openxiangda-workspace-build-source",
+  "version": "1.0.0",
+  "description": "Source for OpenXiangda workspace build tools bundled in the openxiangda package",
+  "type": "module",
+  "bin": {
+    "lowcode-workspace": "bin/lowcode-workspace.mjs"
+  },
+  "exports": {
+    ".": "./src/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "scripts",
+    "package.json",
+    "README.md"
+  ],
+  "scripts": {
+    "prepublishOnly": "node ./bin/lowcode-workspace.mjs --help"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "^4.3.0",
+    "ali-oss": "^6.23.0",
+    "autoprefixer": "^10.4.21",
+    "dotenv": "^16.6.1",
+    "glob": "^10.4.5",
+    "minimist": "^1.2.8",
+    "p-limit": "^5.0.0",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.20.0",
+    "vite": "^6.0.0"
+  }
+}

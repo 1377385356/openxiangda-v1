@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["examples/best-practices/src/*", "src/*"],
+      "openxiangda": [
+        "../../packages/sdk/src/components/index.ts",
+        "node_modules/openxiangda"
+      ],
+      "openxiangda/runtime": [
+        "../../packages/sdk/src/runtime/index.ts",
+        "node_modules/openxiangda/runtime"
+      ]
+    }
+  },
+  "include": [
+    "examples/best-practices/src/**/*.ts",
+    "examples/best-practices/src/**/*.tsx",
+    "examples/best-practices/**/*.json",
+    "src/types/**/*.ts",
+    "src/shared/form-schema.ts"
+  ]
+}

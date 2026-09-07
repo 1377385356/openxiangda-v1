@@ -1,0 +1,21 @@
+---
+description: src/pages/** — Use openxiangda-page skill
+globs: src/pages/**/*
+alwaysApply: false
+---
+
+# OpenXiangda Page Files
+
+Editing files under `src/pages/<pageCode>/`. Use the **`openxiangda-page`** skill.
+
+Structure for complex pages: `page.config.ts` / `page.tsx` (thin) / `domain/` / `shared/{services,hooks}/` / `components/` / `styles.css`.
+
+Strong defaults:
+- 正式入口 (admin / portal) MUST be app-shell: `entry: { mode: "app-shell", hidePlatformNav: true, defaultRoute: "<home>" }`.
+- Default `cssIsolation: "none"` + native Tailwind utilities. Don't use `bg-card` / `text-muted-foreground` shadcn tokens.
+- List pages: use `DataManagementList` + pagination + structured `filterGroup`. Never `pageSize=10000` + browser-side filter.
+- Filters, search bars, modals, drawers, and inline edits: use OpenXiangda platform components for platform data fields; otherwise use `antd` / `antd-mobile`.
+- AI-authored `src/pages/**` must not contain raw native `<input>` / `<select>` / `<textarea>` / file input, hand-written pickers/uploaders, or hand-written user/department selectors.
+- External APIs: `src/resources/connectors/` + `sdk.connector.call()`. Joined read-only: `src/resources/data-views/` + `sdk.dataView.query()`. Notifications: `src/resources/notifications/` + `sdk.notification`.
+
+Publish: `openxiangda workspace publish --profile <name> --page <pageCode>` (first `--dry-run`).

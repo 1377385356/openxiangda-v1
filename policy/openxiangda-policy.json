@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "openxiangda_engineering_policy_v1",
+  "policyVersion": 7,
+  "risk": {
+    "levels": ["L0", "L1", "L2", "L3"],
+    "quickMaxLevel": "L1",
+    "classifyBy": [
+      "data-impact",
+      "permission-impact",
+      "contract-impact",
+      "reversibility",
+      "dependency-blast-radius"
+    ],
+    "directoryIsOnlySignal": true
+  },
+  "sdd": {
+    "sourceOfTruth": "openspec/changes/<change>/change.json",
+    "verifyIsReadOnly": true,
+    "markdownIsDerived": true,
+    "explicitWriteCommands": ["sdd sync", "sdd record-result", "sdd render"]
+  },
+  "git": {
+    "platformRepositoryMode": "direct-authoritative-master",
+    "applicationTaskMode": "isolated-worktree",
+    "applicationPublishMode": "clean-authoritative-master",
+    "taskReadyCommand": "sdd ready",
+    "integrationCommand": "sdd bundle",
+    "requireRemoteMainlineContainment": true
+  },
+  "release": {
+    "normalDeliveryVersion": 2,
+    "trustedDeveloperMode": true,
+    "normalCommands": ["check", "deploy", "status", "retry", "rollback"],
+    "productionConsumesSealedPackage": true,
+    "serverPersistedReleaseRun": true,
+    "sealedAuthoredBuildClosure": true,
+    "workspaceNodeModulesDuringExecution": false,
+    "exactResourceFingerprintDiff": true,
+    "deletionsFailClosed": true,
+    "attemptFencing": true,
+    "crossMachineBindingReplay": true,
+    "deterministicRuntimeBuildIdentity": "runtime-layer-plus-package-digest",
+    "deterministicRuntimeUploadedReleaseReuse": "exact-content-source-parent-only",
+    "statusAutoResolvesEnvironment": true,
+    "v2RequiresSdd": false,
+    "v2RequiresGitMainline": false,
+    "planAndVerifyAreReadOnly": true,
+    "applicationEnvironmentMode": "candidate-preproduction-evidence-production",
+    "candidateImmutable": true,
+    "productionDirectPublish": false,
+    "sameCandidateRequiredForPromotion": true,
+    "atomicChildren": [
+      "RuntimeRelease",
+      "PageRelease",
+      "BackendRelease",
+      "FormRelease",
+      "WorkflowRelease"
+    ],
+    "unsupportedGenericMode": "fail-closed",
+    "explicitMaintenanceDirectMode": true,
+    "postCommitMode": "transactional-outbox"
+  },
+  "ownership": {
+    "defaultTtlSeconds": 7200,
+    "releaseOnTaskReady": true
+  },
+  "testing": {
+    "layers": ["changed", "contract", "release", "all"],
+    "evidenceDirectory": ".openxiangda/evidence/tests",
+    "preproductionEvidenceMaxAgeHours": 24
+  }
+}

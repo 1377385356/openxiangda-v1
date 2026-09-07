@@ -1,0 +1,11 @@
+.bp-mobile-shell {
+  display: flex;
+  min-height: 100%;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+.bp-mobile-shell__content {
+  flex: 1;
+  padding: 16px;
+}

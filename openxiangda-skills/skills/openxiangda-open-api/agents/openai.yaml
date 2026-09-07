@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenXiangda Open API"
+  short_description: "External backend API contracts and AK/SK workflows."
+  default_prompt: "Use $openxiangda-open-api to implement a secure backend integration with the private low-code platform Open API."

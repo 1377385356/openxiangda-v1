@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "publishedByDefault": false,
+  "copyInto": "src/",
+  "templates": [
+    {
+      "code": "glass-home-dashboard",
+      "type": "page-ui-template",
+      "path": "src/pages/glass-home-dashboard",
+      "uiTemplate": "glass-home-dashboard",
+      "recommendedFor": ["经营首页", "管理驾驶舱", "轻量门户首页"],
+      "description": "Default light-blue glass dashboard shell with sidebar, top search, welcome banner, quick actions, KPI cards, charts, ranking, activity feed, query states, and drawer form actions."
+    },
+    {
+      "code": "mint-analytics-dashboard",
+      "type": "page-ui-template",
+      "path": "src/pages/mint-analytics-dashboard",
+      "uiTemplate": "mint-analytics-dashboard",
+      "recommendedFor": ["数据分析", "BI 概览", "经营日报"],
+      "description": "Mint analytics dashboard with high-density metrics, line/bar/donut charts, notices, todos, business summary, system health, query states, and drawer form actions."
+    },
+    {
+      "code": "ops-monitor-dashboard",
+      "type": "page-ui-template",
+      "path": "src/pages/ops-monitor-dashboard",
+      "uiTemplate": "ops-monitor-dashboard",
+      "recommendedFor": ["运营监控", "任务中心", "系统健康度", "告警中心"],
+      "description": "Blue-purple operations monitor with realtime trends, animated metric cards, task progress, health score, device status, alerts, quick actions, query states, and drawer form actions."
+    },
+    {
+      "code": "work-order-list-drawer",
+      "type": "page-ui-template",
+      "path": "src/pages/work-order-list-drawer",
+      "uiTemplate": "work-order-list-drawer",
+      "recommendedFor": ["CRUD 列表", "工单管理", "审批处理", "数据管理页"],
+      "description": "Default restrained admin list template with filters, toolbar, status stats, table, loading/empty/error branches, and right-side overlay drawers for detail, create, edit, and process forms."
+    },
+    {
+      "code": "customer-profile",
+      "type": "form",
+      "path": "src/forms/customer-profile",
+      "description": "Standard form schema covering field types, validation, users, departments, attachments, and subforms."
+    },
+    {
+      "code": "service-ticket-lifecycle",
+      "type": "state-flow",
+      "path": "src/domain/service-ticket",
+      "description": "Lifecycle state machine with ticket and action-log forms. Does not use workflow."
+    },
+    {
+      "code": "service-ticket-ops",
+      "type": "page",
+      "path": "src/pages/service-ticket-ops",
+      "description": "DataManagementList-based ops page with modular actions, drawer, timeline, hook, and service."
+    },
+    {
+      "code": "access-governance",
+      "type": "permissions",
+      "path": "access-governance.md",
+      "description": "Generic account/role permission mode decision with organization, account, role assignment, sync function, role resource, page group, and form group skeletons."
+    },
+    {
+      "code": "role-governance",
+      "type": "permissions",
+      "path": "src/domain/role-governance",
+      "description": "Dynamic role maintenance, role sync, maintainable scope fields, hidden permission keys, and permission-group resource examples."
+    },
+    {
+      "code": "pc-portal-shell",
+      "type": "app-shell-page",
+      "path": "src/pages/pc-portal-shell",
+      "description": "PC app-shell entry with routes, modules, shared domain usage, and no hardcoded view URLs."
+    },
+    {
+      "code": "mobile-portal-shell",
+      "type": "app-shell-page",
+      "path": "src/pages/mobile-portal-shell",
+      "description": "Mobile app-shell entry sharing domain/service logic with the PC portal."
+    },
+    {
+      "code": "interactive-workbench",
+      "type": "page",
+      "path": "src/pages/interactive-workbench",
+      "description": "Pure interaction workbench with reducer state, modular panels, and unified query states."
+    },
+    {
+      "code": "expense-approval-workflow",
+      "type": "workflow",
+      "path": "src/resources/workflows/expense-approval-workflow.json",
+      "description": "True approval workflow example. Use only when approval tasks are required."
+    },
+    {
+      "code": "daily-ticket-digest",
+      "type": "automation",
+      "path": "src/resources/automations/daily-ticket-digest",
+      "description": "Scheduled JS_CODE automation that queries paginated data and sends notification resources."
+    }
+  ]
+}
