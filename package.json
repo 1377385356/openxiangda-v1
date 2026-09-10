@@ -146,7 +146,8 @@
     "test:skill-install": "bash scripts/skill-install-smoke.sh",
     "test:workspace-init": "bash scripts/workspace-init-smoke.sh",
     "open-api:sync": "node scripts/sync-dingtalk-openapi.mjs",
-    "open-api:verify": "node scripts/sync-dingtalk-openapi.mjs --check"
+    "open-api:verify": "node scripts/sync-dingtalk-openapi.mjs --check",
+    "test:migration-advice": "node scripts/migration-advice-smoke.mjs"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.23.0",

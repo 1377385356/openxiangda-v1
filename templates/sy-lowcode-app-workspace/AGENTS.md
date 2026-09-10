@@ -5,6 +5,10 @@
 > 任何 AI（Qoder / Claude / Codex / Cursor / Copilot 等）在本工作区操作前 **必须先读完本文件**。
 > 这是 `sy-lowcode-app-workspace`，由 `openxiangda` CLI 统一管理；普通 npm 习惯不适用于此工作区的发布与生命周期操作。
 
+## 工具升级与代际选择
+
+建议评估升级到 OpenXiangda 2.0；新应用优先使用 V2，已有项目先确认能力覆盖、迁移成本及验收。工具更新不转换应用。Node.js 24+ 可安装 `npm install -g openxiangda@latest`，再使用新版全局入口执行 `openxiangda migrate assess --to v2`。本项目依赖继续按 `legacy-v1` 维护。CLI、Skill、MCP 说明见 https://github.com/1377385356/openxiangda/blob/master/docs/getting-started.md#upgrade 。
+
 ## 一句话原则
 
 **本工作区声明 `deliveryVersion: 2`。所有“发布 / 上线 / 部署 / publish / deploy / ship / release”请求只使用 `openxiangda check`、`openxiangda deploy`、`openxiangda status`、`openxiangda retry`、`openxiangda rollback`，完整约定见 [DELIVERY.md](DELIVERY.md)。**

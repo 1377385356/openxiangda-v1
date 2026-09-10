@@ -7,6 +7,10 @@ alwaysApply: true
 
 This is a `sy-lowcode-app-workspace` managed by the `openxiangda` CLI. Read [AGENTS.md](AGENTS.md) for the full guidance. The summary below is auto-injected into every Qoder turn.
 
+## 工具升级与代际选择
+
+建议评估升级到 OpenXiangda 2.0；新应用优先使用 V2，已有项目先确认能力覆盖、迁移成本及验收。工具更新不转换应用。Node.js 24+ 可安装 `npm install -g openxiangda@latest`，再使用新版全局入口执行 `openxiangda migrate assess --to v2`。本项目依赖继续按 `legacy-v1` 维护。CLI、Skill、MCP 说明见 https://github.com/1377385356/openxiangda/blob/master/docs/getting-started.md#upgrade 。
+
 ## Hard route — 用户意图 → skill / 命令
 
 | 用户说 | 必用 skill | 必用命令 |

@@ -22,6 +22,21 @@ Normal OpenXiangda app development uses platform-user login tokens through `/ope
 
 Private platform routing is fixed: backend APIs are under `/service`, platform management is under `/platform`, and app runtime access is under `/view`. Passing a root domain such as `https://platform.example.com/` to the CLI is supported; OpenXiangda stores the API base as `https://platform.example.com/service`.
 
+## 升级到 OpenXiangda 2.0
+
+建议评估升级到 OpenXiangda 2.0；新应用优先使用 V2，现有应用先确认能力覆盖、迁移成本与验收方案。准备 Node.js 24+，安装最新统一入口：
+
+```bash
+npm install -g openxiangda@latest --registry=https://registry.npmjs.org
+# 进入原 V1 项目，使用新版全局入口
+openxiangda version --json
+openxiangda migrate assess --to v2 --json
+```
+
+`latest` / `stable-v2` 是 V2 稳定渠道，`legacy-v1` 是 V1 维护渠道。统一入口继续用原项目的 V1 引擎；不会自动迁移配置、数据或流程。V1 项目用 `openxiangda update install --target workspace` 更新同代维护版；全局入口用 `--target launcher` 更新。项目锁定的 V1 CLI 不提供 `migrate` 命令，评估时使用新版全局命令。
+
+版本查询、更新检查/安装、Skill 安装后会展示建议；JSON 调用通过 `migrationAdvice` 字段提供同样信息。CLI、Skill、MCP 如何安装、刷新以及配置客户端，见[统一安装升级说明](https://github.com/1377385356/openxiangda/blob/master/docs/getting-started.md#upgrade)。工具更新与应用迁移分别执行。
+
 ## OpenXiangda 1.x Delivery V2 (maintenance)
 
 New workspaces declare `deliveryVersion: 2`. The release flow is intentionally

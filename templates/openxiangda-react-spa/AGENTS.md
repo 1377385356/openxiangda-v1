@@ -4,6 +4,10 @@
 
 本工作区是标准 React 18 + Vite + React Router 应用。默认模板只提供应用壳、账号菜单和一个首页，不是开发验证控制台。
 
+## 工具升级与代际选择
+
+建议评估升级到 OpenXiangda 2.0；新应用优先使用 V2，已有项目先确认能力覆盖、迁移成本及验收。工具更新不转换应用。Node.js 24+ 可安装 `npm install -g openxiangda@latest`，再使用新版全局入口执行 `openxiangda migrate assess --to v2`。本项目依赖继续按 `legacy-v1` 维护。CLI、Skill、MCP 说明见 https://github.com/1377385356/openxiangda/blob/master/docs/getting-started.md#upgrade 。
+
 ## Delivery V2（发布唯一入口）
 
 本工作区声明 `deliveryVersion: 2`，正常发布只使用 `openxiangda check`、`openxiangda deploy`、`openxiangda status`、`openxiangda retry`、`openxiangda rollback`，完整约定见 [DELIVERY.md](DELIVERY.md)。V2 按资源指纹计算精确范围，使用不依赖工作区 `node_modules` 的 CLI 密封工具链，并在服务端持久化 ReleaseRun、attempt 和检查点；跨机器重试只重放本地 Form 绑定。Runtime buildId 同时包含 Runtime layer 与密封包摘要，避免相同 Runtime 字节在不同包之间发生来源碰撞；同包重试仅在历史 Release 为 `uploaded` 且内容、源码、父版本完全一致时复用，不覆盖不可变存储对象。删除和未密封构建依赖在写入前失败关闭。`status`/`retry` 未指定环境时会自动定位预发或生产。V2 不要求 SDD、Git clean、主线 ancestry、`--change`、`--only` 或生产确认参数。本文后续出现的 `resource publish`、`runtime deploy`、`release publish/ship`、candidate、SDD/mainline 发布门禁均为 V1 底层兼容说明，不得用于 V2 正常发布。

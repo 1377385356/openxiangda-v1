@@ -20,6 +20,7 @@ const excluded = new Set([
   'test:ci',
 ]);
 const releaseTests = new Set([
+  'test:migration-advice',
   'test:delivery-v2-package',
   'test:delivery-v2-executor',
   'test:delivery-v2-release-conformance',

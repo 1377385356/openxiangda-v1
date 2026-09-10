@@ -19,6 +19,10 @@ If the workspace contains `app-workspace.config.ts`, forms/pages/resource manife
 
 For an existing V1 project, proactively check whether V2 covers its required capabilities, whether it is still in testing, and whether migration cost is manageable. When those conditions hold, recommend V2 first and explain the benefit, rebuild scope and verification cost. Use the unified entry's `openxiangda migrate assess --to v2` for source pointers; confirm the project design, data/workflow mapping, acceptance and rollback before implementing migration. Keep unknown conditions explicit and continue current maintenance with the matching engine until migration is authorized.
 
+## Installation and upgrade
+
+For CLI, Skill and MCP setup or upgrades, read the [unified installation guide](https://github.com/1377385356/openxiangda/blob/master/docs/getting-started.md#upgrade). Install the global launcher with Node.js 24+ using `npm install -g openxiangda@latest --registry=https://registry.npmjs.org`. Use that global command for `migrate assess`; a project-local V1 CLI does not implement it. Workspace updates remain on `legacy-v1`. Refresh matching skills after dependency updates and restart a configured V2 MCP client to load its new project version. Never automatically replace a V1 project dependency with V2.
+
 ## 1.x Delivery V2 is the normal 1.x release path
 
 When `app-workspace.config.ts` declares `deliveryVersion: 2`, all later V1 SDD,
