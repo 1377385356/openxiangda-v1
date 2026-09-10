@@ -133,7 +133,7 @@ const {
   const writeJson = (file, value) => {
     fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
   };
-  writeJson(path.join(tempHome, '.openxiangda', 'profiles.json'), {
+  writeJson(path.join(workspace, '.openxiangda', 'profiles.json'), {
     version: 1,
     currentProfile: 'test',
     profiles: {

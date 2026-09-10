@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "openxiangda.release-notes/v1",
+  "version": "1.0.269",
+  "title": "OpenXiangda V1 工作区登录与 V2 升级建议",
+  "status": "reviewed",
+  "summary": "V1 平台登录态按工作区隔离，停止读取和合并全局 profiles；版本、升级与技能刷新入口展示 V2 采用建议。",
+  "newFeatures": ["V1 人类可读命令展示 V2 推荐与迁移评估入口，JSON 结果提供结构化 migrationAdvice。", "login、auth 和 platform 支持 --cwd 指定登录态所属工作区。"],
+  "fixes": ["登录、刷新与退出读写工作区 .openxiangda/profiles.json，避免不同项目覆盖同一全局账号。", "会话对象固定来源文件，切换目录后仍写回原工作区；登录文件原子保存、权限 0600 并自动忽略 Git 跟踪。", "新建工作区可保留受管登录文件；Git 基线只读检查使用隔离的工作区凭据副本。"],
+  "affectedUsers": ["维护 V1 应用、在多个工作区使用不同平台或账号的开发者。"],
+  "compatibility": {"node": ">=18；全局 V2 统一入口需要 >=24", "workspaceGenerations": ["v1"], "workspacePolicy": "原全局 profiles 保留但不再读取，升级后每个项目必须重新登录；已有工作区 profiles 可直接使用。", "platformPolicy": "不改变平台身份、授权协议或生产应用。OSS 环境配置仍由原全局 .env 管理。"},
+  "upgradeSteps": ["将项目依赖锁定到 openxiangda@1.0.269 或运行同代 update install。", "进入项目重新运行 openxiangda login <platform-url>；新项目先用 --cwd <directory> 指定目标目录登录。", "执行 skill install --force 和 skill bootstrap --force 刷新技能与工作区指引，再运行项目检查。", "使用 Node.js 24 的统一入口查看 V2 迁移建议并执行 migrate assess，按评估结果规划应用迁移。"],
+  "knownLimitations": ["不会自动复制全局或其他项目的令牌，也不会自动迁移 V1 应用到 V2。", "同一工作区并发登录或刷新仍受平台令牌有效性约束。"],
+  "issues": []
+}

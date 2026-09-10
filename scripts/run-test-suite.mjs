@@ -21,6 +21,7 @@ const excluded = new Set([
 ]);
 const releaseTests = new Set([
   'test:migration-advice',
+  'test:workspace-auth',
   'test:delivery-v2-package',
   'test:delivery-v2-executor',
   'test:delivery-v2-release-conformance',

@@ -2,7 +2,7 @@
 
 OpenXiangda durable project bindings live in `.openxiangda/state.json`. Volatile release execution, candidate, deployment, and recovery progress lives under the private `.openxiangda/releases/` journal and must not be copied into the durable ID map.
 
-Tokens never belong in the project. User tokens live in `~/.openxiangda/profiles.json`. Shared workspace env values such as `APP_OSS_*` live in `~/.openxiangda/.env` by default, while project `.env` is only a local override.
+Tokens are private workspace files and must never be committed. User tokens live in `.openxiangda/profiles.json`. Shared workspace env values such as `APP_OSS_*` live in `~/.openxiangda/.env` by default, while project `.env` is only a local override.
 
 ## Shape
 

@@ -15,7 +15,7 @@ process.env.OPENXIANGDA_RUNTIME_UPLOAD_TIMEOUT_MS = '30000';
 process.chdir(workspace);
 
 fs.writeFileSync(
-  path.join(home, '.openxiangda', 'profiles.json'),
+  path.join(workspace, '.openxiangda', 'profiles.json'),
   JSON.stringify(
     {
       version: 1,

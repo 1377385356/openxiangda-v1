@@ -58,7 +58,7 @@ Delivery V2 自动从期望状态按资源指纹计算精确范围，使用 CLI 
 - ✅ 某个应用角色如果要查询组织账号，声明 `app:organization:read`；如需创建、修改账号/部门或重置密码，再声明 `app:organization:manage`。角色设置、页面/表单权限组等能力同样通过 `src/resources/roles/<code>.json` 的 `apiPermissionCodes` 显式授权，例如 `app:role:manage`、`app:page-permission-group:manage`、`app:form-permission-group:manage`。
 - ✅ 查询家校通讯录的家长、学生、教师、班主任身份和班级/监护关系时使用 `sdk.organization.schoolContact.*` / `ctx.organization.schoolContact.*`。`SCHOOL_HEAD_TEACHER` 只判断全局身份，具体班级必须读取 `teachers.list` 的 `isHeadTeacher`、`teacher.managedClasses` 和 `class.headTeachers`。已登录非游客用户无需绑定应用角色权限，默认查询当前租户全部关系；只有明确要求时才声明 `:self:read` 或 `:class:read` 收紧。
 - ✅ 单文件改动默认按 change 和逻辑资源增量发布：`workspace plan --profile <name> --change <change> --changed`，再 `workspace publish --profile <name> --change <change> --only pages/a,forms/b --dry-run` → 正式发布。
-- ✅ 用户 token 在 `~/.openxiangda/profiles.json`；项目 state 在 `.openxiangda/state.json`（只存 ID）。
+- ✅ 用户 token 在 `.openxiangda/profiles.json`；项目 state 在 `.openxiangda/state.json`（只存 ID）。
 - ✅ 共享环境（`APP_OSS_*`、反馈机器人等）在 `~/.openxiangda/.env`，项目 `.env` 仅做 per-workspace override。
 - ✅ 多 profile（dev / prod / ...）资源 ID 互不复用；每个 profile 的 `appType` / `formUuid` / `pageId` / `workflowId` / `automationId` 独立维护。
 - ✅ 改已有应用前先 `openxiangda app snapshot APP_XXX --profile <name> --json`。
@@ -161,3 +161,5 @@ sy-lowcode-app-workspace/
 - candidate 创建后允许主线继续合入不相干任务；晋级时要求 candidate commit 仍是已推送主线祖先，且 sealed 输入文件哈希全部不变。任一输入变化都必须重建 candidate。
 - 同一目标环境一次只允许一个 running / evidence-pending deployment；CLI 会先等待应用 lease 和部署槽位。`--wait-seconds 0` 只用于快速发现占用，不能绕过 CAS。
 - 紧急修复使用精确 L1 scope，仍按 candidate → preproduction → production 发布；不得跳过应用/环境资源映射校验、预发证据或生产确认。应用内逐函数 `resources` 仅作映射和审计，不是权限白名单。
+
+平台登录态只使用当前工作区的 `.openxiangda/profiles.json`，不再读取或合并用户主目录的全局 profiles。升级后请进入每个项目运行 `openxiangda login <platform-url>`；子目录沿最近应用根目录定位，不跨嵌套应用或 Git 边界。登录文件及临时文件会自动加入忽略规则，请勿提交或打包。新项目先用 `openxiangda login <platform-url> --cwd <directory>` 在目标目录登录，再在该目录运行 `openxiangda workspace init`。

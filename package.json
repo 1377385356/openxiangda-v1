@@ -1,6 +1,6 @@
 {
   "name": "openxiangda",
-  "version": "1.0.268",
+  "version": "1.0.269",
   "description": "OpenXiangda CLI, workspace build tools, runtime SDK, and form components.",
   "private": false,
   "bin": {
@@ -147,7 +147,8 @@
     "test:workspace-init": "bash scripts/workspace-init-smoke.sh",
     "open-api:sync": "node scripts/sync-dingtalk-openapi.mjs",
     "open-api:verify": "node scripts/sync-dingtalk-openapi.mjs --check",
-    "test:migration-advice": "node scripts/migration-advice-smoke.mjs"
+    "test:migration-advice": "node scripts/migration-advice-smoke.mjs",
+    "test:workspace-auth": "node scripts/workspace-auth-smoke.mjs"
   },
   "dependencies": {
     "@ant-design/cssinjs": "^1.23.0",
@@ -231,43 +232,42 @@
   },
   "openxiangdaRelease": {
     "schemaVersion": "openxiangda.release-notes/v1",
-    "version": "1.0.268",
-    "title": "OpenXiangda V1 维护版 1.0.268",
+    "version": "1.0.269",
+    "title": "OpenXiangda V1 工作区登录与 V2 升级建议",
     "status": "reviewed",
-    "summary": "旧项目继续使用 V1 引擎，项目升级保持在 V1 维护渠道；同时兼容新的全局统一入口与独立的 V2 Skill。",
+    "summary": "V1 平台登录态按工作区隔离，停止读取和合并全局 profiles；版本、升级与技能刷新入口展示 V2 采用建议。",
     "newFeatures": [
-      "V1 工具源码从经审查的公开基线发布到独立 GitHub 仓库，并提供对应版本说明。"
+      "V1 人类可读命令展示 V2 推荐与迁移评估入口，JSON 结果提供结构化 migrationAdvice。",
+      "login、auth 和 platform 支持 --cwd 指定登录态所属工作区。"
     ],
     "fixes": [
-      "在 V1 项目内执行 update 默认更新项目依赖，使用 v1 维护渠道并固定具体版本。",
-      "全局入口更新单独使用 --target launcher，检查 Node.js 24 要求并安装统一 V2 入口。",
-      "V1 主 Skill 使用 openxiangda-v1 名称，安装时保留统一入口和 V2 技能。",
-      "V1 发布仅允许 legacy-v1 渠道，防止维护版覆盖 V2 的 latest。"
+      "登录、刷新与退出读写工作区 .openxiangda/profiles.json，避免不同项目覆盖同一全局账号。",
+      "会话对象固定来源文件，切换目录后仍写回原工作区；登录文件原子保存、权限 0600 并自动忽略 Git 跟踪。",
+      "新建工作区可保留受管登录文件；Git 基线只读检查使用隔离的工作区凭据副本。"
     ],
     "affectedUsers": [
-      "维护既有 V1 项目的开发者",
-      "已经安装全局统一入口的 V1 用户"
+      "维护 V1 应用、在多个工作区使用不同平台或账号的开发者。"
     ],
     "compatibility": {
       "node": ">=18；全局 V2 统一入口需要 >=24",
       "workspaceGenerations": [
         "v1"
       ],
-      "workspacePolicy": "沿用现有 app-workspace.config.ts、平台绑定、登录态、业务数据及流程。",
-      "platformPolicy": "本次维护不改变平台协议或部署状态。"
+      "workspacePolicy": "原全局 profiles 保留但不再读取，升级后每个项目必须重新登录；已有工作区 profiles 可直接使用。",
+      "platformPolicy": "不改变平台身份、授权协议或生产应用。OSS 环境配置仍由原全局 .env 管理。"
     },
     "upgradeSteps": [
-      "项目依赖通过 v1 维护渠道升级，例如 npm install --save-dev --save-exact openxiangda@1.0.268；按项目实际包管理器和依赖类型调整。",
-      "安装全局 V2 统一入口后，进入旧项目运行 openxiangda version --json 核对 V1 引擎来源。",
-      "刷新对应项目的 V1 Skill，检查依赖与锁文件差异，并执行原有项目测试。",
-      "V2 能力满足、项目仍在测试阶段且迁移成本可控时，优先建议 V1 项目采用 V2；先完成项目评估、设计确认和迁移验收。"
+      "将项目依赖锁定到 openxiangda@1.0.269 或运行同代 update install。",
+      "进入项目重新运行 openxiangda login <platform-url>；新项目先用 --cwd <directory> 指定目标目录登录。",
+      "执行 skill install --force 和 skill bootstrap --force 刷新技能与工作区指引，再运行项目检查。",
+      "使用 Node.js 24 的统一入口查看 V2 迁移建议并执行 migrate assess，按评估结果规划应用迁移。"
     ],
     "knownLimitations": [
-      "本版本不会自动把 V1 应用迁移到 V2；跨代迁移需要独立设计、映射、演练和批准。",
-      "既有 1.0.267 及更早版本的全局更新命令可能安装 latest；新统一入口仍按旧项目标记调用 V1 引擎。"
+      "不会自动复制全局或其他项目的令牌，也不会自动迁移 V1 应用到 V2。",
+      "同一工作区并发登录或刷新仍受平台令牌有效性约束。"
     ],
     "issues": [],
-    "sha256": "7aaa99d31b91f725b785259031daaeaf3841cb18a95f6155e43009f1f601e6c9",
-    "url": "https://github.com/1377385356/openxiangda-v1/releases/tag/v1.0.268"
+    "sha256": "112d003eb255dbdf9b221e6ec16c19fefe4a6e164bff22854e6128ad62df5d01",
+    "url": "https://github.com/1377385356/openxiangda-v1/releases/tag/v1.0.269"
   }
 }

@@ -83,9 +83,9 @@ try {
   {
     const context = makeEnv()
     const project = fs.mkdtempSync(path.join(tempRoot, "workflow-resource-"))
-    fs.mkdirSync(path.join(context.home, ".openxiangda"), { recursive: true })
+    fs.mkdirSync(path.join(project, ".openxiangda"), { recursive: true })
     fs.writeFileSync(
-      path.join(context.home, ".openxiangda", "profiles.json"),
+      path.join(project, ".openxiangda", "profiles.json"),
       `${JSON.stringify({
         version: 1,
         currentProfile: "dev",

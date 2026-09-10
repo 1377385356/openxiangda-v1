@@ -144,7 +144,7 @@ try {
 
   fs.mkdirSync(path.join(home, ".openxiangda"), { recursive: true })
   fs.writeFileSync(
-    path.join(home, ".openxiangda", "profiles.json"),
+    (fs.mkdirSync(path.join(workspace, ".openxiangda"), { recursive: true }), path.join(workspace, ".openxiangda", "profiles.json")),
     `${JSON.stringify(
       {
         version: 1,

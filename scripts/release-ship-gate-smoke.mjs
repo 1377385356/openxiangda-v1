@@ -178,7 +178,7 @@ assert.equal(
 
 try {
   fs.mkdirSync(workspace, { recursive: true });
-  writeJson(path.join(home, '.openxiangda', 'profiles.json'), {
+  writeJson((fs.mkdirSync(path.join(workspace, '.openxiangda'), { recursive: true }), path.join(workspace, '.openxiangda', 'profiles.json')), {
     version: 1,
     currentProfile: 'dev',
     profiles: {

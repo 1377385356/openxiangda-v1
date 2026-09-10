@@ -146,7 +146,8 @@ try {
     server.listen(0, '127.0.0.1', resolve);
   });
   const address = server.address();
-  const configFile = path.join(home, '.openxiangda', 'profiles.json');
+  fs.mkdirSync(path.join(cwd, '.openxiangda'), { recursive: true });
+  const configFile = path.join(cwd, '.openxiangda', 'profiles.json');
   fs.writeFileSync(
     configFile,
     `${JSON.stringify(

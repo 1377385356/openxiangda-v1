@@ -68,3 +68,5 @@ This is an OpenXiangda React SPA workspace using Delivery V2. Read [DELIVERY.md]
 ## 并行 candidate
 
 candidate 只可跨越不相干的后续主线提交：其 commit 必须仍是干净、已推送主线的祖先，且 sealed 输入哈希全部不变。同一目标一次只允许一个 running / evidence-pending deployment；等待 lease/槽位，紧急修复也走精确 candidate → preproduction → production。
+
+平台登录态只使用当前工作区的 `.openxiangda/profiles.json`，不再读取或合并用户主目录的全局 profiles。升级后请进入每个项目运行 `openxiangda login <platform-url>`；子目录沿最近应用根目录定位，不跨嵌套应用或 Git 边界。登录文件及临时文件会自动加入忽略规则，请勿提交或打包。新项目先用 `openxiangda login <platform-url> --cwd <directory>` 在目标目录登录，再在该目录运行 `openxiangda workspace init`。

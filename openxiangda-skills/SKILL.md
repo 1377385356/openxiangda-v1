@@ -233,3 +233,5 @@ The lease is app-level promotion ownership, while worktree ownership prevents tw
 - `../openxiangda-open-api/SKILL.md`
 
 Load a reference only when the selected subskill explicitly requires it. Workspace `AGENTS.md` remains authoritative for project-specific constraints.
+
+平台登录态只使用当前工作区的 `.openxiangda/profiles.json`，不再读取或合并全局 profiles。升级后请进入每个项目运行 `openxiangda login <platform-url>`。登录文件自动加入 Git 忽略规则，不得提交或打包。

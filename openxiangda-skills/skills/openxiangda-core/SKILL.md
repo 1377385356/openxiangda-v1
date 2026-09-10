@@ -181,7 +181,7 @@ openxiangda platform use dev
 
 Root, `/platform`, and `/view` URLs normalize to `<origin>/service`. Normal work uses the user's profile token and `/openxiangda-api/v1`; never ask for AK/SK. Each profile has independent `appType` and resource IDs.
 
-Durable local resource/environment mappings live in `.openxiangda/state.json`; volatile candidate/deployment progress lives in the private `.openxiangda/releases/` journal. User tokens live in `~/.openxiangda/profiles.json`; shared environment values live in `~/.openxiangda/.env`. Never copy resource IDs between profiles or put tokens in the workspace.
+Durable local resource/environment mappings live in `.openxiangda/state.json`; volatile candidate/deployment progress lives in the private `.openxiangda/releases/` journal. User tokens live in `.openxiangda/profiles.json`; shared environment values live in `~/.openxiangda/.env`. Never copy resource IDs between profiles or commit workspace login files.
 
 For an environment-managed workspace with more than one target, `function invoke` requires an explicit `--environment <target>` and prints the resolved profile, environment, kind, appType, and environmentId to stderr before the request. Treat this line as part of the diagnostic evidence; do not infer production behavior from an invocation whose resolved target is preproduction.
 

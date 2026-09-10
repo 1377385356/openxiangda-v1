@@ -230,7 +230,7 @@ try {
     throw new Error("design review should catch legacy public runtime patterns")
   }
   fs.writeFileSync(
-    path.join(tempHome, ".openxiangda", "profiles.json"),
+    path.join(workspace, ".openxiangda", "profiles.json"),
     `${JSON.stringify({
       version: 1,
       currentProfile: "zju",

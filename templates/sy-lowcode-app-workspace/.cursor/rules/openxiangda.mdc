@@ -53,7 +53,7 @@ This is a `sy-lowcode-app-workspace` managed by the `openxiangda` CLI. See [AGEN
 - Confirm current profile before any write: `openxiangda env --profile <name>`.
 - `.openxiangda/state.json` is the authoritative durable profile → appType → resource-ID map; volatile release/deployment progress stays in the private `.openxiangda/releases/` journal. CLI maintains both; do not hand-edit.
 - In a managed workspace with multiple targets, pass `--environment <target>` to `function invoke` and verify the resolved target printed on stderr.
-- User tokens live in `~/.openxiangda/profiles.json`; shared env in `~/.openxiangda/.env`.
+- User tokens live in `.openxiangda/profiles.json`; shared env in `~/.openxiangda/.env`.
 - Form fields need user-facing `placeholder`; use `SelectField` / `RadioField` for enums, `linkedForm` SelectField for cross-form sources.
 - Form-entry component priority: OpenXiangda platform components → `antd` / `antd-mobile` wrappers → custom business component only when neither fits.
 - Proactively run `openxiangda feedback submit --yes` for platform defects, missing capabilities, unclear rules, repeated workarounds, AI uncertainty, and user-visible UX gaps; tell the user what was reported and the fingerprint.
@@ -83,3 +83,5 @@ Read [AGENTS.md](mdc:AGENTS.md) and the global skill: `~/.qoder/skills/openxiang
 ## Parallel candidates
 
 A candidate may cross unrelated later mainline commits only when its commit remains an ancestor of clean pushed mainline and all sealed input hashes remain unchanged. The later HEAD is only a safety gate; Backend, Runtime, and Root keep the candidate sourceRevision. Each target allows one running or evidence-pending deployment; wait for the lease/slot, and keep emergency fixes on the narrow candidate → preproduction → production path.
+
+平台登录态只使用当前工作区的 `.openxiangda/profiles.json`，不再读取或合并用户主目录的全局 profiles。升级后请进入每个项目运行 `openxiangda login <platform-url>`；子目录沿最近应用根目录定位，不跨嵌套应用或 Git 边界。登录文件及临时文件会自动加入忽略规则，请勿提交或打包。新项目先用 `openxiangda login <platform-url> --cwd <directory>` 在目标目录登录，再在该目录运行 `openxiangda workspace init`。

@@ -201,3 +201,5 @@ import {
 - candidate 创建后允许主线继续合入不相干任务；晋级时要求 candidate commit 仍是已推送主线祖先，且 sealed 输入文件哈希全部不变。任一输入变化都必须重建 candidate。
 - 同一目标环境一次只允许一个 running / evidence-pending deployment；CLI 会先等待应用 lease 和部署槽位。`--wait-seconds 0` 只用于快速发现占用，不能绕过 CAS。
 - 紧急修复使用精确 L1 scope，仍按 candidate → preproduction → production 发布；不得跳过应用/环境资源映射校验、预发证据或生产确认。应用内逐函数 `resources` 仅作映射和审计，不是权限白名单。
+
+平台登录态只使用当前工作区的 `.openxiangda/profiles.json`，不再读取或合并用户主目录的全局 profiles。升级后请进入每个项目运行 `openxiangda login <platform-url>`；子目录沿最近应用根目录定位，不跨嵌套应用或 Git 边界。登录文件及临时文件会自动加入忽略规则，请勿提交或打包。新项目先用 `openxiangda login <platform-url> --cwd <directory>` 在目标目录登录，再在该目录运行 `openxiangda workspace init`。

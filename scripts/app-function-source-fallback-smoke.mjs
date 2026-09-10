@@ -241,7 +241,7 @@ const runOpenXiangda = args => {
 
 const port = await listen()
 fs.writeFileSync(
-  path.join(tempHome, ".openxiangda", "profiles.json"),
+  path.join(workspace, ".openxiangda", "profiles.json"),
   `${JSON.stringify(
     {
       version: 1,

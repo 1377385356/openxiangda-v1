@@ -54,7 +54,7 @@ This is a `sy-lowcode-app-workspace` managed by the `openxiangda` CLI. Read [AGE
 - 任何写操作前确认当前 profile：`openxiangda env --profile <name>`。
 - `.openxiangda/state.json` 是 profile 到 appType / 资源 ID 的持久权威映射；临时 release/deployment 进度只写私有 `.openxiangda/releases/` journal。两者均由 CLI 维护，不要手改。
 - 多 target 的托管工作区执行 `function invoke` 必须显式传 `--environment <target>`，并核对 stderr 回显的最终 target。
-- 用户 token 在 `~/.openxiangda/profiles.json`；共享 env 在 `~/.openxiangda/.env`。
+- 用户 token 在 `.openxiangda/profiles.json`；共享 env 在 `~/.openxiangda/.env`。
 - 表单字段必须有 user-facing `placeholder`；选项使用 `SelectField` / `RadioField`，跨表用 `linkedForm` SelectField。
 - 表单录入组件顺序：OpenXiangda 平台组件 → `antd` / `antd-mobile` 包装 → 必要时自定义业务组件。
 - 发现平台缺陷、能力缺口、规则不清、反复 workaround、AI 不确定点、用户可见体验问题时，主动 `openxiangda feedback submit --yes`；提交后告诉用户反馈内容和 fingerprint。
@@ -84,3 +84,5 @@ This is a `sy-lowcode-app-workspace` managed by the `openxiangda` CLI. Read [AGE
 ## 并行 candidate
 
 candidate 只可跨越不相干的后续主线提交：其 commit 必须仍是干净、已推送主线的祖先，且 sealed 输入哈希全部不变。同一目标一次只允许一个 running / evidence-pending deployment；等待 lease/槽位，紧急修复也走精确 candidate → preproduction → production。
+
+平台登录态只使用当前工作区的 `.openxiangda/profiles.json`，不再读取或合并用户主目录的全局 profiles。升级后请进入每个项目运行 `openxiangda login <platform-url>`；子目录沿最近应用根目录定位，不跨嵌套应用或 Git 边界。登录文件及临时文件会自动加入忽略规则，请勿提交或打包。新项目先用 `openxiangda login <platform-url> --cwd <directory>` 在目标目录登录，再在该目录运行 `openxiangda workspace init`。

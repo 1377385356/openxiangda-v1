@@ -435,7 +435,7 @@ async function beginRelease(changeId, sourceBaseRef = baseCommit) {
 try {
   const port = await listen();
   fs.writeFileSync(
-    path.join(tempHome, '.openxiangda', 'profiles.json'),
+    (fs.mkdirSync(path.join(workspace, '.openxiangda'), { recursive: true }), path.join(workspace, '.openxiangda', 'profiles.json')),
     `${JSON.stringify(
       {
         version: 1,

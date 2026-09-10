@@ -479,7 +479,7 @@ try {
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const port = server.address().port;
   fs.writeFileSync(
-    path.join(tempHome, '.openxiangda', 'profiles.json'),
+    (fs.mkdirSync(path.join(workspace, '.openxiangda'), { recursive: true }), path.join(workspace, '.openxiangda', 'profiles.json')),
     `${JSON.stringify(
       {
         version: 1,

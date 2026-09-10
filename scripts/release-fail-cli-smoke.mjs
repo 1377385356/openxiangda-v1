@@ -109,7 +109,7 @@ try {
   fs.mkdirSync(workspace, { recursive: true });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const port = server.address().port;
-  writeJson(path.join(home, '.openxiangda', 'profiles.json'), {
+  writeJson((fs.mkdirSync(path.join(workspace, '.openxiangda'), { recursive: true }), path.join(workspace, '.openxiangda', 'profiles.json')), {
     version: 1,
     currentProfile: profileName,
     profiles: {

@@ -142,7 +142,7 @@ try {
     server.listen(0, '127.0.0.1', () => resolve(server.address().port));
   });
   fs.writeFileSync(
-    path.join(tempHome, '.openxiangda', 'profiles.json'),
+    path.join(workspace, '.openxiangda', 'profiles.json'),
     `${JSON.stringify({
       version: 1,
       currentProfile: profileName,

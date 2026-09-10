@@ -12,3 +12,5 @@ dist/
 .openxiangda/worktree-managed.json
 .openxiangda/candidates/
 .openxiangda/releases/
+.openxiangda/profiles.json
+.openxiangda/profiles.json.*
