@@ -52,6 +52,7 @@ Function/Automation 仅因源码变化进入 scope 时，默认通过服务端�
 - ❌ 把 `formUuid` / `pageId` / `workflowId` 等平台 ID 直接写进 manifest（CLI 解析逻辑 code）。
 - ❌ 把 API key / token / secret / password / authorization / headers / credential 写进 manifest（平台后台配置）。
 - ✅ App Function 只在 manifest 顶层写逻辑名 `secretRefs`，使用 `function_v2` / `trusted_node_v2` 和 `ctx.secrets.get(name)`；值仅由 `openxiangda secret ... --value-stdin --change ... --profile ...` 管理。
+- ✅ 外部回调在 `src/resources/webhooks/*.json` 只绑定固定 `targetFunctionCode`；验签必须先使用 `input.rawBody`，业务写入必须使用 `input.idempotencyKey` 幂等，Secret/签名规则不写进 Webhook manifest。
 - ❌ data view 用作单表 CRUD、`linkedForm` 下拉、写回、强实时数据源。
 - ❌ 只靠 query 参数、前端隐藏按钮、硬编码角色、mock 权限或 `PermissionBoundary` 作为敏感授权。
 - ❌ 管理型角色缺少 `app:role:manage`、`app:page-permission-group:manage`、`app:form-permission-group:manage` 或 `app:organization:manage`。

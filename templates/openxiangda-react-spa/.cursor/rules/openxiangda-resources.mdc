@@ -25,6 +25,7 @@ openxiangda resource typegen --profile <name>
 - Guest file upload requires a structured form grant such as `{code, actions: ["upload", "preview"], fields?: [...]}`; optional form `upload` or `grants.storage` constraints define bucket/MIME/extensions/size/visibility/path prefix.
 - Connector secrets and third-party credentials belong in the platform backend, never in manifests or page source.
 - App Function manifests may contain only metadata names in top-level `secretRefs`; values use the Secret CLI and runtime `ctx.secrets.get(name)` under `function_v2` / `trusted_node_v2`.
+- Inbound callbacks use `src/resources/webhooks/*.json` with one fixed `targetFunctionCode`. Keep Secret/signature rules out of that manifest; verify `input.rawBody` before any helper call and make business writes idempotent with `input.idempotencyKey`.
 - Formal changes should keep Git as the source of truth: edit manifests, validate, plan, then publish.
 - Exact selectors apply before manifest/source analysis and JS_CODE build: touch only selected targets plus transitive/shared/ambient dependencies; omit selectors only for intentional full-workspace work.
 - `resource plan` and publish dry-runs are GET/HEAD-only. On `READ_ONLY_AUTH_REQUIRED`, run `openxiangda auth refresh --profile <name>` or log in again before retrying; never refresh inside the plan.

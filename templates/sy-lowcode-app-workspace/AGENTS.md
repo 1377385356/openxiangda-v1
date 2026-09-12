@@ -118,6 +118,8 @@ Delivery V2 自动从期望状态按资源指纹计算精确范围，使用 CLI 
 
 App Function 第三方凭据只能在 Function manifest 顶层声明 `secretRefs: [{name, required}]`，并使用 `function_v2` + `runtimeContractVersion: "trusted_node_v2"`；源码通过 `await ctx.secrets.get(name)` 获取。值只能用 `openxiangda secret create|rotate --value-stdin --change <id> --profile <name>` 或隐藏 TTY 配置，禁止写入 Git、`.env`、manifest、源码、构建产物、plan、日志和异常。本地联调只允许 `openxiangda function test --secret-from-env logical=ENV`，它不会把值写入 workspace/cache/state。
 
+外部系统主动回调使用 `src/resources/webhooks/<code>.json`，只声明固定的 `targetFunctionCode`、幂等 Query 参数、Body 上限和启停状态。Secret 仍由目标 Function 顶层 `secretRefs` 声明；Function 必须先基于 `input.rawBody` 验签，再调用任何表单、数据视图、连接器、通知或 HTTP helper，并用 `input.idempotencyKey` 保护业务写入。完整输入和返回契约见 `$openxiangda-workflow-automation` 的 `references/webhooks.md`。
+
 App Function 查询应用角色及维护角色成员必须使用正式的 `ctx.platform.roles`：`findByCode(roleCode)`、`list()`、`get(roleId)`、`listUsers(roleId)`、`addUsers(roleId, userIds)`、`removeUser(roleId, userId)`。该 API 固定到 `ctx.app.appType`，按真实 operator 校验 `app:role:manage` 并保留调用审计；不要依赖自定义的 `ctx.platform.roles` 声明，也不要用泛型 `ctx.platform.api` 绕过角色契约。
 
 ## 工作区结构速查

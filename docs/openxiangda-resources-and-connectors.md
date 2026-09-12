@@ -12,6 +12,7 @@ Supported resource folders:
 - `src/resources/workflows/*.json`
 - `src/resources/automations/*.json`
 - `src/resources/data-views/*.json`
+- `src/resources/webhooks/*.json`
 - `src/resources/auth/*.json`
 - `src/resources/storage/*.json`
 - `src/resources/routes/*.json`
@@ -325,6 +326,38 @@ Do not use a data view when:
 - You need raw SQL, incremental refresh, source-table trigger refresh, write-back, ad-hoc BI, pivot, or window-function analysis. Data views expose declared row and aggregate query shapes only.
 
 Data view manifests live in `src/resources/data-views/*.json`. Use logical `formCode` values in source files. `openxiangda resource publish` resolves them to profile-local `formUuid` values before calling the platform.
+
+## Inbound Webhooks
+
+外部平台主动推送事件时，在 `src/resources/webhooks/<code>.json` 声明公开入口：
+
+```json
+{
+  "code": "yuquan_access",
+  "name": "玉泉门禁开门事件",
+  "targetFunctionCode": "qfyy_access_event",
+  "idempotencyQueryParam": "nonce",
+  "maxBodyBytes": 262144,
+  "status": "active"
+}
+```
+
+Webhook 资源不保存供应商 Secret，也不实现供应商特定协议。目标 Function 通过
+顶层 `secretRefs` 读取 Secret，使用 `input.rawBody` 和重复参数数组 `input.query`
+完成验签，然后解释 `input.body` 并执行业务逻辑。任何表单查询、业务写入、连接器、
+通知或外部 HTTP 调用都必须发生在验签之后。平台按配置 Query 参数做接入幂等，
+应用仍须用 `input.idempotencyKey` 对业务副作用做原子幂等。
+
+```bash
+openxiangda resource validate webhook --profile <name>
+openxiangda resource plan webhook --only yuquan_access --profile <name> --json
+openxiangda resource publish webhook --only yuquan_access --change <id> --profile <name>
+openxiangda webhook deliveries yuquan_access --profile <name> --json
+```
+
+发布响应会返回平台生成的 `callbackPath`，CLI 会结合当前 profile API base 保存
+完整 `callbackUrl` 到 `.openxiangda/state.json`。完整请求结构、HMAC-SHA1 示例、返回 directive 和审计命令见
+`openxiangda-skills/references/webhooks.md`。
 
 Example:
 

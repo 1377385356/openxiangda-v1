@@ -617,6 +617,8 @@ const PublicAccessError = ({ error }: { error: { message?: string } }) => (
 
 App Function 访问第三方凭据时使用 `app_function_secrets_v1`：manifest 顶层只声明 `secretRefs: [{ "name": "dingtalk_org_app_key", "required": true }]`，同时使用 `definitionJson.version="function_v2"`、`runtimeContractVersion="trusted_node_v2"`；源码通过 `await ctx.secrets.get(name)` 解析，并通过 `ctx.utils.http` 访问受控公网 HTTPS（该桥接不会携带平台 Runtime token）。值只能经 `openxiangda secret create|rotate --value-stdin --change <id> --profile <name>` 或隐藏 TTY 输入，禁止进入 Git、manifest、源码、构建产物、plan、日志或异常。带 `secretRefs` 的 Function 必须走 `backend_release_v2`；需要整应用原子发布时先执行 `resource publish function --only <code> --stage-only`，再把返回的真实 `stagedResource` 交给 `release app-finalize --staged-resources-json ...` 完成 `atomic_staged_children_v2`。默认直接激活的 Backend Release 只返回 `activeResource`，不会伪装成 staged；旧平台 capability 不完整时 CLI 会失败关闭，绝不忽略绑定。
 
+外部系统主动调用应用时，在 `src/resources/webhooks/<code>.json` 声明 Inbound Webhook 和固定 `targetFunctionCode`，用 `openxiangda resource validate|plan|publish webhook` 发布。平台返回的 `callbackPath` 是公开回调路径；不要用租户内的 `appType` 自行拼接入口。目标 Function 在顶层 `secretRefs` 声明供应商 Secret，并且必须先基于精确 `input.rawBody` 验签，再访问表单、数据视图、连接器、通知或外部 HTTP；投递是 at-least-once，业务写入还要用 `input.idempotencyKey` 做原子幂等。使用 `openxiangda webhook deliveries|delivery` 查看投递状态和原始请求审计，完整契约见 `openxiangda-skills/references/webhooks.md`。
+
 平台部门和账号管理走 app-scoped organization 能力。只读查询要求目标应用的 `app:organization:read` 或 `app:organization:manage`，创建、更新和密码操作要求 `app:organization:manage`；平台管理员天然可用，普通应用角色需要显式授权。Runtime service principal 不会直接放行，`ctx.organization` 会按真实操作人 / audit actor 校验权限。新接口不提供删除；`account-update` 不能携带 `password`，重置他人密码必须走 `account-reset-password`，当前用户改密用 SDK / `ctx.organization.accounts.changeMyPassword({ oldPassword, newPassword })`。
 
 CLI 写操作必须加 `--force`：

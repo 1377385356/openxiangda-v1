@@ -969,3 +969,15 @@ Requires Bearer token. Creates a short-lived signed OSS upload URL for browser d
 ### POST `/apps/:appType/storage-configs/:code/objects/delete`
 
 Requires Bearer token. Deletes an OSS object under the configured `pathPrefix`.
+## Inbound Webhook
+
+- Management: `GET|POST /openxiangda-api/v1/apps/:appType/webhooks`
+- Detail/update/disable: `GET|POST|PUT|DELETE /openxiangda-api/v1/apps/:appType/webhooks/:code`
+- Delivery list/detail: `GET /openxiangda-api/v1/apps/:appType/webhooks/:code/deliveries[/:deliveryId]`
+- Public callback: `POST /openxiangda-webhooks/v1/:endpointId`
+
+The public `endpointId` resolves tenant/application ownership and is never
+replaced with `appType`. Management calls use normal profile authentication;
+the public callback is unauthenticated at the platform edge and the target
+Function must verify the provider signature from the exact raw body. See
+`webhooks.md` for the declaration and runtime envelope.

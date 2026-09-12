@@ -683,7 +683,37 @@ const result = await sdk.function.invoke("reservation_reminder_summary", {
 
 适用边界：可复用后端业务逻辑、跨页面/自动化/流程共享的查询编排、连接器调用、通知编排、受控平台 API 调用。App Function 支持 `ctx.form.queryOne/queryMany/getById/createOne/updateOne/updateById`、`ctx.dataView`、`ctx.connector`、`ctx.notification`、`ctx.platform.roles`、`ctx.platform.api` 等受控 helper，当前 MVP 不暴露原始 SQL/Redis。应用角色查询和成员维护优先使用 `ctx.platform.roles.list/findByCode/addUsers/removeUser`；底层 `ctx.platform.api` 返回 HTTP 包装与平台 envelope，需要自行解包。已发布可信代码可以访问当前租户、当前应用内的资源；function manifest 的 `resources` 是可选映射、审计和影响分析信息，不再是逐函数权限白名单。页面用户仍不能直接提交内部表单，跨应用和跨租户访问仍被拒绝。运行时接口默认需要应用自动化管理权限；普通用户页面要调用时，用 `definitionJson.runtimeInvoke.audience` 声明 `authenticated`、`page_permission_group`、`app_roles`、`platform_roles` 或 `scope_policy`，使用 `roleCodes` 匹配应用角色、使用 `platformRoleCodes` 匹配同步身份 `SCHOOL_GUARDIAN`、`SCHOOL_STUDENT`、`SCHOOL_TEACHER`，不要把 `"*"`、`"all-app-roles"` 写进角色编码。若表单只能由函数/流程写入，在 `src/resources/settings/forms/<formCode>.json` 设置 `runtimeWrite.mode="function_only"` 关闭原始写入接口。
 
-## 5. Workflow — `src/resources/workflows/<code>/workflow.json`（manifest）+ `src/workflows/<code>/workflow.ts`（代码优先）
+## 5. Inbound Webhook — `src/resources/webhooks/<code>.json`
+
+```json
+{
+  "code": "yuquan_access",
+  "name": "玉泉门禁开门事件",
+  "targetFunctionCode": "qfyy_access_event",
+  "idempotencyQueryParam": "nonce",
+  "maxBodyBytes": 262144,
+  "status": "active"
+}
+```
+
+Webhook 只声明公开入口到固定 App Function 的映射，不包含 Secret 或验签规则。
+供应商 Secret 在目标 Function 顶层 `secretRefs` 声明，源码通过
+`await ctx.secrets.get(name)` 读取，并且必须在任何表单查询、写入、连接器或通知
+调用之前使用 `input.rawBody` 验签。平台保存原始 UTF-8 Body、Base64 Body、原始
+Query 字符串、重复参数数组、解析 JSON 和安全请求头；投递为 at-least-once，应用
+还必须用 `input.idempotencyKey` 对业务写入做幂等保护。
+
+```bash
+openxiangda resource validate webhook --profile <name>
+openxiangda resource plan webhook --only yuquan_access --profile <name> --json
+openxiangda resource publish webhook --only yuquan_access --change <id> --profile <name>
+openxiangda webhook deliveries yuquan_access --profile <name> --json
+```
+
+完整 Function 输入、HMAC-SHA1 常量时间比较、返回状态和玉泉门禁示例见
+[`webhooks.md`](webhooks.md)。
+
+## 6. Workflow — `src/resources/workflows/<code>/workflow.json`（manifest）+ `src/workflows/<code>/workflow.ts`（代码优先）
 
 ```jsonc
 // src/resources/workflows/customer_approval/workflow.json
@@ -713,7 +743,7 @@ export default defineWorkflow({
 
 CLI 编译为 `definition.v3.json` + `preview.json`，平台运行时仍走标准工作流引擎。完整规则见 [`workflow-v3.md`](workflow-v3.md)。
 
-## 6. Automation — `src/resources/automations/<code>/{definition.code.json,preview.json}` + `src/automations/<code>/index.ts`
+## 7. Automation — `src/resources/automations/<code>/{definition.code.json,preview.json}` + `src/automations/<code>/index.ts`
 
 ```jsonc
 // src/resources/automations/notify_on_submit/definition.code.json
