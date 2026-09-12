@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "openxiangda.release-notes/v1",
+  "version": "1.0.270",
+  "title": "OpenXiangda V1 Inbound Webhook",
+  "status": "reviewed",
+  "summary": "V1 应用可以声明公开 Inbound Webhook，由平台可靠接入并转发给固定 App Function，供应商验签和业务处理仍由应用负责。",
+  "newFeatures": ["新增 src/resources/webhooks/*.json 资源声明、校验、计划、发布、拉取和停用能力。", "新增 webhook list/get/create/update/upsert/disable/deliveries/delivery 命令，用于配置和投递诊断。", "Webhook Function 获得原始 Body、原始 Query、重复参数数组、安全 Headers、投递 ID 和幂等键。"],
+  "fixes": ["Function 资源在 Webhook 之前发布，prune 对遗失的 Webhook 执行停用而不是删除审计数据。", "模板、Skill、命令发现和 API 参考统一说明 rawBody 验签、secretRefs 和业务幂等要求。"],
+  "affectedUsers": ["需要接收门禁、支付、IoT 或其他第三方主动回调的 OpenXiangda V1 应用开发者。"],
+  "compatibility": {"node": ">=18；全局 V2 统一入口需要 >=24", "workspaceGenerations": ["v1"], "workspacePolicy": "现有 V1 资源保持兼容；只有声明 webhooks 的应用会创建公开回调端点。", "platformPolicy": "必须部署包含 V1 Webhook 管理/公开入口、SQL 迁移和网关规则的平台版本。App Function Secret 必须按部署规范启用。"},
+  "upgradeSteps": ["将 V1 项目依赖锁定到 openxiangda@1.0.270 或运行同代 update install。", "执行 skill install --force 和 skill bootstrap --force，阅读 references/webhooks.md。", "先发布声明 secretRefs 的 trusted_node_v2 Function，再声明并发布 Webhook。", "从 .openxiangda/state.json 读取 callbackUrl，配置到供应商并用投递查询命令完成验签、重试和幂等验收。"],
+  "knownLimitations": ["首版公开入口只接受 application/json 的 HTTP POST，单端点 Body 上限不超过 1 MiB。", "平台不内置供应商签名算法；Function 必须按照供应商正式协议使用 rawBody 验签。", "投递语义为 at-least-once，应用必须用 input.idempotencyKey 原子保护业务副作用。"],
+  "issues": []
+}
