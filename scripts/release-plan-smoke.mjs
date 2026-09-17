@@ -91,6 +91,56 @@ assert.ok(
   !steps.some(step => /workspace publish .*--form/.test(step.command)),
   'Form schema must never fall back to direct workspace activation',
 );
+const legacyMixedSteps = buildWorkspaceReleaseSteps(
+  {
+    forms: ['booking-slot-lock'],
+    pages: ['mobile-booking', 'operation-matrix', 'piano-room-admin'],
+    functions: [
+      'batch_occupancy_service',
+      'booking_commit_service',
+      'mobile_booking_query_service',
+    ],
+  },
+  'legacy',
+  'zju-itservice',
+  'release-booking-lock-priority-20260917-v2',
+);
+assert.deepEqual(
+  legacyMixedSteps.map(step => step.id),
+  [
+    'form-ensure',
+    'form-stage',
+    'backend-stage',
+    'workspace-publish',
+    'app-finalize',
+  ],
+  'legacy mixed releases must stage Form, Backend, and Page children before one Root finalize',
+);
+assert.match(
+  legacyMixedSteps.find(step => step.id === 'form-stage').command,
+  /resource publish form-setting --only booking-slot-lock/,
+);
+assert.match(
+  legacyMixedSteps.find(step => step.id === 'backend-stage').command,
+  /--staged-form-contracts booking-slot-lock/,
+);
+const legacyPageStage = legacyMixedSteps.find(
+  step => step.id === 'workspace-publish',
+);
+assert.match(
+  legacyPageStage.command,
+  /--only pages\/mobile-booking,pages\/operation-matrix,pages\/piano-room-admin/,
+);
+assert.doesNotMatch(
+  legacyPageStage.command,
+  /forms\//,
+  'legacy PageRelease staging must not directly publish a Form target',
+);
+assert.equal(
+  legacyMixedSteps.filter(step => step.id === 'app-finalize').length,
+  1,
+  'legacy mixed releases must activate all immutable children once',
+);
 const workflowSteps = buildWorkspaceReleaseSteps(
   { workflows: ['approval_flow'] },
   'react-spa',

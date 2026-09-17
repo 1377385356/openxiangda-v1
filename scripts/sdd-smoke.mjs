@@ -557,6 +557,47 @@ try {
     mixedFormCliVerify.passed,
     `the generated bundle must pass the exact public CLI prepublish command: ${JSON.stringify(mixedFormCliVerify.errors)}`,
   );
+  sddLib.proposeSddChange({
+    cwd: bundleWorkspace,
+    changeId: "fix-legacy-page",
+    affected: {
+      pages: ["admin.orders"],
+      files: ["src/pages/orders/index.tsx"],
+    },
+  });
+  sddLib.approveSddChange({
+    cwd: bundleWorkspace,
+    changeId: "fix-legacy-page",
+  });
+  const legacyMixedBundle = sddLib.createMainlineSddBundle({
+    cwd: bundleWorkspace,
+    changeId: "legacy-mixed-release-train",
+    changes: "fix-business-task-form,fix-function,fix-legacy-page",
+    configText: "export default {};\n",
+    profile: "dev",
+  });
+  assert(
+    JSON.stringify(legacyMixedBundle.release.commands) ===
+      JSON.stringify([
+        "openxiangda form ensure --only business_task --profile dev --change legacy-mixed-release-train",
+        "openxiangda resource publish form-setting --only business_task --profile dev --change legacy-mixed-release-train",
+        "openxiangda resource publish function --only reservation_review_action --stage-only --staged-form-contracts business_task --profile dev --change legacy-mixed-release-train",
+        "openxiangda workspace publish --only pages/admin.orders --skip-resources --profile dev --change legacy-mixed-release-train",
+        "openxiangda release app-finalize --staged-resources-json .openxiangda/releases/legacy-mixed-release-train/staged-resources.json --wait --profile dev --change legacy-mixed-release-train",
+      ]),
+    "legacy mixed bundles must stage FormRelease, BackendRelease, and PageRelease before one Root finalize",
+  );
+  const legacyMixedVerify = sddLib.verifySddChange({
+    cwd: bundleWorkspace,
+    changeId: "legacy-mixed-release-train",
+    stage: "prepublish",
+    targets: legacyMixedBundle.release.targets,
+    files: legacyMixedBundle.release.changedFiles,
+  });
+  assert(
+    legacyMixedVerify.passed,
+    `legacy mixed bundle verification must accept its generated atomic plan: ${JSON.stringify(legacyMixedVerify.errors)}`,
+  );
   const inexactMixedFormVerify = sddLib.verifySddChange({
     cwd: bundleWorkspace,
     changeId: "form-permission-release-train",
