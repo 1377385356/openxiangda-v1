@@ -32,6 +32,7 @@ const {
   resolveManagedStateBinding,
   resolveEnvironmentTarget,
   saveCandidate,
+  withLegacyReleaseForwardedFlags,
   withManagedReleaseForwardedFlags,
   withOnlineBaselineAdoptionFlags,
   withReleaseClientSessionArgs,
@@ -883,6 +884,40 @@ assert.deepEqual(
   ],
   'manifest replacement must never be forwarded to an unscoped backend stage'
 );
+assert.deepEqual(
+  withLegacyReleaseForwardedFlags(
+    'backend-stage',
+    ['resource', 'publish', 'function', '--only', 'batch_occupancy_service'],
+    {
+      'replace-manifest': true,
+      reason: 'reviewed exact qfyy backend manifest replacement',
+    }
+  ),
+  [
+    'resource',
+    'publish',
+    'function',
+    '--only',
+    'batch_occupancy_service',
+    '--replace-manifest',
+    '--reason',
+    'reviewed exact qfyy backend manifest replacement',
+  ],
+  'legacy publish must forward replacement authority to its exact Backend stage'
+);
+for (const stepId of ['form-stage', 'workspace-publish', 'workflow-stage', 'app-finalize']) {
+  const args = stepId.endsWith('-stage')
+    ? ['resource', 'publish', '--only', 'example']
+    : ['workspace', 'publish', '--only', 'pages/example'];
+  assert.equal(
+    withLegacyReleaseForwardedFlags(stepId, args, {
+      'replace-manifest': true,
+      reason: 'reviewed exact qfyy backend manifest replacement',
+    }).includes('--replace-manifest'),
+    false,
+    `legacy replacement authority must not leak into ${stepId}`
+  );
+}
 assert.deepEqual(
   withManagedReleaseForwardedFlags(
     'form-stage',

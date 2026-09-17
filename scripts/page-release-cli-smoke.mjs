@@ -45,8 +45,80 @@ function git(args, cwd = workspace) {
 
 fs.mkdirSync(path.join(tempHome, '.openxiangda'), { recursive: true });
 fs.mkdirSync(workspace, { recursive: true });
-write('.gitignore', '.openxiangda/\n');
-writeJson('package.json', { private: true });
+write('.gitignore', '.openxiangda/\ndist/\nnode_modules/\n');
+writeJson('package.json', {
+  name: 'page-release-smoke',
+  private: true,
+  type: 'module',
+});
+write(
+  'src/index.css',
+  '@layer tailwind-base { @tailwind base; }\n@tailwind components;\n@tailwind utilities;\n'
+);
+write(
+  'tailwind.config.cjs',
+  `const path = require('node:path');
+const presetModule = require('openxiangda/tailwind-preset');
+const preset = presetModule.default ?? presetModule;
+const packagePath = require.resolve('openxiangda');
+module.exports = {
+  content: [
+    './src/**/*.{js,ts,jsx,tsx}',
+    path.join(path.dirname(packagePath), '..', '**/*.{js,mjs,cjs}'),
+  ],
+  blocklist: ['[-:T]', '[-:TZ.]'],
+  presets: [preset],
+  theme: { extend: {} },
+  plugins: [],
+};
+`
+);
+fs.mkdirSync(path.join(workspace, 'node_modules'), { recursive: true });
+const dependencyRoot = path.join(repoRoot, 'node_modules');
+for (const name of fs.readdirSync(dependencyRoot)) {
+  if (name === 'openxiangda') continue;
+  const target = path.join(dependencyRoot, name);
+  fs.symlinkSync(
+    target,
+    path.join(workspace, 'node_modules', name),
+    fs.statSync(target).isDirectory() ? 'dir' : 'file'
+  );
+}
+fs.symlinkSync(repoRoot, path.join(workspace, 'node_modules', 'openxiangda'), 'dir');
+write(
+  'app-workspace.config.ts',
+  `export default {
+  appType: '${appType}',
+  appName: 'Page release smoke',
+  platformUrl: 'http://127.0.0.1',
+  version: '1.2.0',
+  oss: {
+    region: 'oss-cn-hangzhou',
+    bucket: 'page-release-smoke',
+    pathPrefix: 'app-workspace',
+  },
+  defaults: {
+    protocolVersion: '1.0',
+    frameworkVersion: '18.3.1',
+    cssIsolation: 'none',
+  },
+};
+`,
+);
+for (const code of ['home', 'admin']) {
+  write(`src/pages/${code}/index.tsx`, 'export default {};\n');
+  write(`src/pages/${code}/App.tsx`, 'export default {};\n');
+  write(
+    `src/pages/${code}/page.config.ts`,
+    `export default {
+  code: '${code}',
+  name: '${code}',
+  route: { pathKey: '${code}' },
+  menu: { enabled: false },
+};
+`,
+  );
+}
 git(['init', '--bare', '--initial-branch=main', origin], tempRoot);
 for (const args of [
   ['init', '-b', 'main'],
@@ -224,15 +296,26 @@ const server = http.createServer(async (request, response) => {
     }
     return respond(response, {
       staged: body.stage,
-      activated: body.activate,
-      items: [
-        {
-          pageId: body.pages[0].code === 'home' ? 'PAGE_HOME' : 'PAGE_NEW',
-          code: body.pages[0].code,
-          routeKey: body.pages[0].code,
-          revision: body.expectedRevision + 1,
-        },
-      ],
+      activation: body.activate ? { active: true } : null,
+      release: {
+        id: targetReleaseId,
+        version: body.version,
+        buildId: body.buildId,
+        releaseHash: targetReleaseHash,
+        parentReleaseId: activeReleaseId,
+        immutable: true,
+      },
+      items: body.pages.map(page => ({
+        pageId:
+          page.code === 'home'
+            ? 'PAGE_HOME'
+            : page.code === 'admin'
+              ? 'PAGE_ADMIN'
+              : 'PAGE_NEW',
+        code: page.code,
+        routeKey: page.code,
+        revision: Number(body.expectedRevisions?.[page.code] || 0) + 1,
+      })),
     });
   }
   if (
@@ -286,12 +369,103 @@ const runCli = args =>
     child.on('close', code => resolve({ code, stdout, stderr }));
   });
 
+const runBundledWorkspaceScript = (scriptName, scriptArgs) =>
+  new Promise((resolve, reject) => {
+    const child = spawn(
+      process.execPath,
+      [
+        path.join(
+          repoRoot,
+          'packages',
+          'sdk',
+          'src',
+          'build-source',
+          'scripts',
+          scriptName
+        ),
+        ...scriptArgs,
+      ],
+      {
+        cwd: workspace,
+        env: {
+          ...process.env,
+          HOME: tempHome,
+          LOWCODE_WORKSPACE_ROOT: workspace,
+          OPENXIANGDA_ACCESS_TOKEN: 'test-token',
+          OPENXIANGDA_APP_TYPE: appType,
+          OPENXIANGDA_BASE_URL: process.env.PAGE_RELEASE_SMOKE_BASE_URL,
+          OPENXIANGDA_CHANGE_ID: 'page-release-smoke',
+          OPENXIANGDA_CLI: path.join(repoRoot, 'bin', 'openxiangda.js'),
+          OPENXIANGDA_PAGE_STAGE_ONLY: '1',
+          OPENXIANGDA_PROFILE: profileName,
+          APP_BUILD_ID: 'bundled-register-build',
+          CODEX_THREAD_ID: 'page-release-cli-smoke',
+        },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }
+    );
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', chunk => {
+      stdout += chunk;
+    });
+    child.stderr.on('data', chunk => {
+      stderr += chunk;
+    });
+    child.on('error', reject);
+    child.on('close', code => resolve({ code, stdout, stderr }));
+  });
+
+const runBundledRegister = (pageNames, extraArgs = []) =>
+  runBundledWorkspaceScript('register.mjs', [
+    '--page-list-json',
+    JSON.stringify(pageNames),
+    ...extraArgs,
+  ]);
+
 const pagePublishArgs = (pageCode, extra = []) => [
   'page',
   'publish',
   pageCode,
   '--entry-url',
   `https://cdn.example.com/${pageCode}.js`,
+  '--version',
+  '1.1.0',
+  '--build-id',
+  'target-build',
+  '--profile',
+  profileName,
+  '--json',
+  ...extra,
+];
+
+const batchDefinitionsPath = path.join(
+  workspace,
+  '.openxiangda',
+  'batch-pages.json'
+);
+writeJson('.openxiangda/batch-pages.json', {
+  pages: ['home', 'admin'].map(code => ({
+    code,
+    name: code,
+    route: { pathKey: code },
+    runtime: {
+      entryUrl: `https://cdn.example.com/${code}.js`,
+      cssUrls: [],
+      jsUrls: [`https://cdn.example.com/${code}.js`],
+      framework: 'react',
+      frameworkVersion: '18.3.1',
+      cssIsolation: 'none',
+    },
+    menu: { enabled: false },
+  })),
+});
+
+const batchPublishArgs = extra => [
+  'page',
+  'publish',
+  '--pages-json',
+  batchDefinitionsPath,
   '--version',
   '1.1.0',
   '--build-id',
@@ -325,6 +499,7 @@ try {
       2
     )}\n`
   );
+  process.env.PAGE_RELEASE_SMOKE_BASE_URL = `http://127.0.0.1:${port}/service`;
 
   const noContextStart = calls.length;
   const noContext = await runCli(pagePublishArgs('home'));
@@ -344,6 +519,115 @@ try {
   assert.equal(begun.code, 0, begun.stderr || begun.stdout);
 
   mode = 'normal';
+  const bundledPublishDryRunStart = calls.length;
+  const bundledPublishDryRun = await runBundledWorkspaceScript('publish-all.mjs', [
+    '--only',
+    'pages/home,pages/admin',
+    '--dry-run',
+  ]);
+  assert.equal(
+    bundledPublishDryRun.code,
+    0,
+    bundledPublishDryRun.stderr || bundledPublishDryRun.stdout
+  );
+  assert.equal(
+    callsSince(
+      bundledPublishDryRunStart,
+      call => call.method === 'POST' && call.path.endsWith('/pages/publish')
+    ).length,
+    0,
+    'bundled publish-all dry-run must not write a PageRelease'
+  );
+
+  const bundledDryRunStart = calls.length;
+  const bundledDryRun = await runBundledRegister(['home', 'admin'], ['--dry-run']);
+  assert.equal(bundledDryRun.code, 0, bundledDryRun.stderr || bundledDryRun.stdout);
+  assert.equal(
+    callsSince(
+      bundledDryRunStart,
+      call => call.method === 'POST' && call.path.endsWith('/pages/publish')
+    ).length,
+    0,
+    'bundled register dry-run must not write a PageRelease'
+  );
+
+  const bundledRegisterStart = calls.length;
+  const bundledRegister = await runBundledRegister(['home', 'admin']);
+  assert.equal(
+    bundledRegister.code,
+    0,
+    bundledRegister.stderr || bundledRegister.stdout
+  );
+  const bundledRegisterPublish = callsSince(
+    bundledRegisterStart,
+    call =>
+      call.method === 'POST' &&
+      call.path.endsWith('/pages/publish') &&
+      call.body.buildId === 'bundled-register-build'
+  );
+  assert.equal(
+    bundledRegisterPublish.length,
+    1,
+    'bundled register must create one PageRelease for all selected pages'
+  );
+  assert.equal(bundledRegisterPublish[0].body.stage, true);
+  assert.equal(bundledRegisterPublish[0].body.activate, false);
+  assert.deepEqual(
+    bundledRegisterPublish[0].body.pages.map(page => page.code),
+    ['home', 'admin']
+  );
+  const bundledRegisterResources = JSON.parse(
+    fs.readFileSync(
+      path.join(
+        workspace,
+        '.openxiangda',
+        'releases',
+        'page-release-smoke',
+        'staged-resources.json'
+      ),
+      'utf8'
+    )
+  );
+  assert.equal(bundledRegisterResources.length, 1);
+  assert.equal(bundledRegisterResources[0].kind, 'PageRelease');
+  assert.deepEqual(
+    bundledRegisterResources[0].metadata.selectedPageCodes,
+    ['admin', 'home']
+  );
+
+  const batchStart = calls.length;
+  const batch = await runCli(batchPublishArgs([]));
+  assert.equal(batch.code, 0, batch.stderr || batch.stdout);
+  const batchPublish = callsSince(
+    batchStart,
+    call => call.method === 'POST' && call.path.endsWith('/pages/publish')
+  );
+  assert.equal(batchPublish.length, 1, 'batch must create one PageRelease');
+  assert.deepEqual(
+    batchPublish[0].body.pages.map(page => page.code),
+    ['home', 'admin']
+  );
+  assert.equal(batchPublish[0].headers['if-match'], undefined);
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(batchPublish[0].body, 'expectedRevision'),
+    false,
+    'multi-page publish must not send a single-page expectedRevision'
+  );
+  assert.deepEqual(batchPublish[0].body.expectedRevisions, { home: 7, admin: 4 });
+  const batchResources = JSON.parse(
+    fs.readFileSync(
+      path.join(
+        workspace,
+        '.openxiangda',
+        'releases',
+        'page-release-smoke',
+        'staged-resources.json'
+      ),
+      'utf8'
+    )
+  );
+  assert.deepEqual(batchResources[0].metadata.selectedPageCodes, ['admin', 'home']);
+
   const stageStart = calls.length;
   const staged = await runCli(pagePublishArgs('home'));
   assert.equal(staged.code, 0, staged.stderr || staged.stdout);
@@ -375,6 +659,23 @@ try {
     },
   });
   assert.equal(publish.headers['if-match'], 'home-7');
+  const stagedResources = JSON.parse(
+    fs.readFileSync(
+      path.join(
+        workspace,
+        '.openxiangda',
+        'releases',
+        'page-release-smoke',
+        'staged-resources.json'
+      ),
+      'utf8'
+    )
+  );
+  assert.equal(stagedResources.length, 1);
+  assert.equal(stagedResources[0].kind, 'PageRelease');
+  assert.equal(stagedResources[0].identity.releaseId, targetReleaseId);
+  assert.equal(stagedResources[0].hash, targetReleaseHash);
+  assert.deepEqual(stagedResources[0].metadata.selectedPageCodes, ['home']);
 
   const newStart = calls.length;
   const newPage = await runCli(pagePublishArgs('reports'));

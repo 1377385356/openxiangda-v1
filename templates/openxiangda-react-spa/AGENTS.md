@@ -65,6 +65,8 @@ openxiangda commands --json
 
 未登记环境的旧工作区只有在平台已核验“精确非删除目标来自多次历史发布、无法对应单一 Git 基线”时，才可在同一条 `release publish` 上增加 `--adopt-online-baseline --adoption-reason "..."`。CLI 只把该意图传给精确 `resource publish --only/--code` 阶段；表单 ensure、Runtime 与 App finalize 不接收，原因不足或没有精确资源阶段会在获取租约前失败关闭。
 
+Legacy PageRelease 工作区的 `release publish` 会给 Page step 注入 `OPENXIANGDA_PAGE_STAGE_ONLY=1`，并要求当前包内 CLI 写入 staged PageRelease evidence；缺少证据时禁止 Root finalize。需要完整替换 Function/Automation manifest 时可成对增加 `--replace-manifest --reason "..."`，该权限只进入唯一的精确 Backend stage，不进入 Form、Page、Workflow 或 Root。
+
 模板已停用无范围的 `pnpm deploy` 聚合入口。日常变更必须使用 `resource plan|publish <type> --only <codes>`（单资源可用 `--code <code>`）。Form bundle、Backend Release 和 Runtime 都先暂存；CLI 会按 `--change` 自动聚合 `.openxiangda/releases/<change>/staged-resources.json`，最后只由一次 Root App finalize 原子激活。Form Release 一旦 abort 绝不能作为幂等结果复用；重新执行相同精确表单发布时，CLI 会淘汰旧 staged 索引，平台会创建新的不可变 attempt，再由 Root App 一次事务重试。相同 change 的既有 staged FormRelease 只有在 CLI 重新核验服务端不可变状态、identity/hash、冻结 schema/formType、finalized 资源、parent/base revision 和当前 Form Head 后，才可重挂接到新的 baseline/session；`schemaSyncedAt` 只是本地缓存元数据。禁止伪造它、提前激活 Form 或用顺序激活多张表单绕过失败。不要使用 `workspace publish --form`、单独 `runtime activate`、`pnpm publish:all`、`pnpm openxiangda:publish` 或 `lowcode-workspace publish-all`。
 
 同一发布同时包含 Form 设置和表单权限组时，必须由一条 `resource publish form-setting,form-permission-group` 命令暂存，并在 `--only` 中分别使用 `form-setting:<code>`、`form-permission-group:<code>`。SDD bundle 与 prepublish 校验使用同一精确契约；缺失、夹带、拆成两个 FormRelease 或提前激活都应失败关闭。

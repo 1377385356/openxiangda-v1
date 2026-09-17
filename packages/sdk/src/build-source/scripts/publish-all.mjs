@@ -99,6 +99,16 @@ const only = changedOnly
     : targetPage
       ? [`pages/${targetPage}`]
       : normalizeOnly(args.only);
+const stageOnlyPageRelease = process.env.OPENXIANGDA_PAGE_STAGE_ONLY === "1";
+if (
+  stageOnlyPageRelease &&
+  (only.length === 0 || only.some((target) => !target.startsWith("pages/")))
+) {
+  console.error(
+    "❌ PAGE_RELEASE_STAGE_SCOPE_REQUIRED: stage-only 页面发布必须使用 --page 或只包含 pages/* 的精确 --only 范围",
+  );
+  process.exit(1);
+}
 
 if (changedOnly && only.length === 0) {
   console.log("✅ 没有检测到 src/forms 或 src/pages 的 git 变更，跳过发布");
@@ -145,7 +155,10 @@ const publishLegacyFormBundle =
   Boolean(config.forms?.publishLegacyBundle);
 
 const allModules = discoverWorkspaceModules();
-const plan = planIncrementalPublish(allModules, { force, only });
+const plan = planIncrementalPublish(allModules, {
+  force: force || stageOnlyPageRelease,
+  only,
+});
 printPlan(plan, "publish-all");
 if (plan.changed.length === 0 && !force) {
   console.log("✅ 没有检测到变更，跳过发布");
@@ -177,9 +190,27 @@ for (const moduleItem of plan.changed) {
   } else if (moduleItem.kind === "pages") {
     await run("build-pages.mjs", ["--page", moduleItem.name, ...maybeForce]);
     await run("publish-oss.mjs", ["--page", moduleItem.name, ...maybeDryRun]);
-    await run("register.mjs", ["--page", moduleItem.name, ...maybeDryRun]);
+    if (!stageOnlyPageRelease) {
+      await run("register.mjs", ["--page", moduleItem.name, ...maybeDryRun]);
+    }
     publishedModules.push(moduleItem);
   }
+}
+
+if (stageOnlyPageRelease) {
+  const pageNames = publishedModules
+    .filter((moduleItem) => moduleItem.kind === "pages")
+    .map((moduleItem) => moduleItem.name);
+  if (pageNames.length === 0) {
+    throw new Error(
+      "PAGE_RELEASE_STAGE_SCOPE_REQUIRED: stage-only 页面发布没有可登记的精确页面",
+    );
+  }
+  await run("register.mjs", [
+    "--page-list-json",
+    JSON.stringify(pageNames),
+    ...maybeDryRun,
+  ]);
 }
 
 if (!dryRun) {

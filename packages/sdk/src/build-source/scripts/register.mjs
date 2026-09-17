@@ -3,7 +3,9 @@
  */
 
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+import { spawn } from "node:child_process";
 import { glob } from "glob";
 import minimist from "minimist";
 import {
@@ -31,6 +33,8 @@ const args = minimist(process.argv.slice(2).filter((arg) => arg !== "--"));
 const dryRun = Boolean(args["dry-run"]);
 const targetForm = args.form || null;
 const targetPage = args.page || null;
+const targetPageList = parsePageList(args["page-list-json"]);
+const stageOnlyPageRelease = process.env.OPENXIANGDA_PAGE_STAGE_ONLY === "1";
 const ensureExistingFormMenu =
   Boolean(args["ensure-menu"]) ||
   ["1", "true", "yes"].includes(
@@ -48,10 +52,34 @@ register - 注册应用工作区产物到平台
   --dry-run        只打印注册计划，不实际调用 API
   --form <name>    只注册指定表单
   --page <name>    只注册指定代码页目录
+  --page-list-json <JSON>  注册指定代码页目录数组（内部批量发布入口）
   --ensure-menu    已存在 formUuid 的表单也尝试补齐菜单
   --help, -h       显示帮助信息
 `);
   process.exit(0);
+}
+
+if (targetPage && targetPageList.length > 0) {
+  console.error("❌ --page 和 --page-list-json 不能同时使用");
+  process.exit(1);
+}
+
+function parsePageList(value) {
+  if (value === undefined || value === null || value === "") return [];
+  let parsed;
+  try {
+    parsed = JSON.parse(String(value));
+  } catch (error) {
+    throw new Error(`PAGE_REGISTER_SCOPE_INVALID: page-list-json 不是合法 JSON: ${error.message}`);
+  }
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error("PAGE_REGISTER_SCOPE_INVALID: page-list-json 必须是非空数组");
+  }
+  const normalized = parsed.map((item) => String(item || "").trim()).filter(Boolean);
+  if (normalized.length !== parsed.length || new Set(normalized).size !== normalized.length) {
+    throw new Error("PAGE_REGISTER_SCOPE_INVALID: page-list-json 包含空值或重复页面");
+  }
+  return normalized;
 }
 
 const config = await loadConfig();
@@ -251,7 +279,7 @@ function readFormRuntimeAssets(config) {
 }
 
 async function registerPages() {
-  const pages = await discoverPages(targetPage || "");
+  const pages = await discoverSelectedPages();
   if (pages.length === 0) {
     return { succeeded: 0, failed: 0 };
   }
@@ -262,6 +290,25 @@ async function registerPages() {
     console.log("  [DRY] 代码页发布 payload:");
     console.log(JSON.stringify(payload, null, 2));
     writePagePublishResult(payload, null, true);
+    return { succeeded: pages.length, failed: 0 };
+  }
+
+  if (stageOnlyPageRelease) {
+    if (!isOpenXiangdaMode(config)) {
+      throw new Error(
+        "PAGE_RELEASE_STAGE_CONTEXT_REQUIRED: stage-only 页面发布只支持 OpenXiangda 模式",
+      );
+    }
+    if (!targetPage && targetPageList.length === 0) {
+      throw new Error(
+        "PAGE_RELEASE_STAGE_SCOPE_REQUIRED: stage-only 页面发布必须提供精确页面范围",
+      );
+    }
+    const data = await publishStagedPagesWithCurrentCli(payload);
+    data.items?.forEach((item) => {
+      console.log(`  ✓ 代码页 ${item.code} (${item.pageId})`);
+    });
+    writePagePublishResult(payload, { data }, false);
     return { succeeded: pages.length, failed: 0 };
   }
 
@@ -291,6 +338,119 @@ async function registerPages() {
   });
   writePagePublishResult(payload, body, false);
   return { succeeded: pages.length, failed: 0 };
+}
+
+async function discoverSelectedPages() {
+  if (targetPage) return discoverPages(targetPage);
+  const pages = await discoverPages("");
+  if (targetPageList.length === 0) return pages;
+  const byName = new Map();
+  for (const page of pages) {
+    byName.set(String(page.dirName || ""), page);
+    byName.set(String(page.config?.code || ""), page);
+  }
+  const missing = targetPageList.filter((name) => !byName.has(name));
+  if (missing.length > 0) {
+    throw new Error(`PAGE_REGISTER_SCOPE_INVALID: 找不到代码页 ${missing.join(",")}`);
+  }
+  return targetPageList.map((name) => byName.get(name));
+}
+
+async function publishStagedPagesWithCurrentCli(payload) {
+  const cli = String(process.env.OPENXIANGDA_CLI || "").trim();
+  const profile = String(config.openXiangdaProfile || process.env.OPENXIANGDA_PROFILE || "").trim();
+  const changeId = String(process.env.OPENXIANGDA_CHANGE_ID || "").trim();
+  if (!cli || !profile || !changeId) {
+    throw new Error(
+      "PAGE_RELEASE_STAGE_CONTEXT_REQUIRED: 缺少 OPENXIANGDA_CLI、OPENXIANGDA_PROFILE 或 OPENXIANGDA_CHANGE_ID",
+    );
+  }
+
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openxiangda-page-stage-"));
+  const definitionsFile = path.join(tempDir, "pages.json");
+  try {
+    fs.writeFileSync(
+      definitionsFile,
+      `${JSON.stringify({ pages: payload.pages }, null, 2)}\n`,
+      { encoding: "utf8", mode: 0o600 },
+    );
+    const cliArgs = [
+      "page",
+      "publish",
+      "--pages-json",
+      definitionsFile,
+      "--version",
+      payload.version,
+      "--build-id",
+      payload.buildId,
+      "--profile",
+      profile,
+      "--change",
+      changeId,
+      "--json",
+    ];
+    if (config.openXiangdaTarget) {
+      cliArgs.push("--environment", config.openXiangdaTarget);
+    }
+    const result = await runCurrentOpenXiangdaCli(cli, cliArgs);
+    const selectedPageCodes = Array.isArray(result?.stagedResource?.metadata?.selectedPageCodes)
+      ? [...result.stagedResource.metadata.selectedPageCodes].sort()
+      : [];
+    const expectedPageCodes = payload.pages.map((page) => page.code).sort();
+    if (
+      result?.stagedResource?.kind !== "PageRelease" ||
+      selectedPageCodes.length !== expectedPageCodes.length ||
+      !expectedPageCodes.every((code, index) => code === selectedPageCodes[index])
+    ) {
+      throw new Error(
+        `PAGE_RELEASE_STAGE_SCOPE_MISMATCH: staged PageRelease 范围不匹配；expected=${expectedPageCodes.join(",")} actual=${selectedPageCodes.join(",") || "-"}`,
+      );
+    }
+    return result;
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+function runCurrentOpenXiangdaCli(cli, args) {
+  return new Promise((resolve, reject) => {
+    const command = cli.endsWith(".js") || cli.endsWith(".mjs") ? process.execPath : cli;
+    const commandArgs = command === process.execPath ? [cli, ...args] : args;
+    const child = spawn(command, commandArgs, {
+      cwd: rootDir,
+      env: process.env,
+      shell: false,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+    child.on("error", reject);
+    child.on("close", (code, signal) => {
+      if (signal || code !== 0) {
+        reject(
+          new Error(
+            `PAGE_RELEASE_STAGE_FAILED: 当前 OpenXiangda CLI 执行失败 (${signal || code}) ${stderr.trim() || stdout.trim()}`,
+          ),
+        );
+        return;
+      }
+      try {
+        resolve(JSON.parse(stdout));
+      } catch (error) {
+        reject(
+          new Error(
+            `PAGE_RELEASE_STAGE_RESULT_INVALID: CLI JSON 输出不可解析: ${error.message}`,
+          ),
+        );
+      }
+    });
+  });
 }
 
 function getPagePublishUrl(appType) {

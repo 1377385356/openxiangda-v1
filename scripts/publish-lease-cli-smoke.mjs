@@ -238,8 +238,19 @@ const server = http.createServer(async (request, response) => {
     assert.equal(body.stage, true);
     assert.equal(body.activate, false);
     return respond(response, {
+      staged: true,
+      activation: null,
+      release: {
+        id: 'PAGE_RELEASE_CONTEXT',
+        releaseHash: 'a'.repeat(64),
+        parentReleaseId: null,
+        immutable: true,
+        version: body.version,
+        buildId: body.buildId,
+      },
       items: [
         {
+          code: 'dashboard',
           pageId: 'PAGE_CONTEXT',
           routeKey: 'dashboard',
           legacyFormUuid: 'FORM_PAGE_CONTEXT',

@@ -8,7 +8,9 @@
   "fixes": [
     "Legacy 发布计划不再把 Form 交给 workspace publish 直接处理，而是生成独立的不可变 FormRelease stage。",
     "BackendRelease 在依赖的 staged Form contract 就绪后执行，legacy Page 继续使用 PageRelease，最后只执行一次 app-finalize。",
-    "SDD bundle 和 prepublish 校验对 legacy Form、Backend、Page 混合发布使用同一组确定性命令。"
+    "SDD bundle 和 prepublish 校验对 legacy Form、Backend、Page 混合发布使用同一组确定性命令。",
+    "Legacy Page step 自动注入 stage-only 环境并记录 PageRelease staged evidence；缺少证据时禁止 Root finalize。",
+    "Legacy release publish 的 manifest replacement 权限只透传给唯一的精确 Backend stage。"
   ],
   "affectedUsers": [
     "使用 legacy PageRelease 且同一变更同时包含 Form、Function/Automation 或 Page 的 OpenXiangda V1 应用。"
@@ -23,6 +25,7 @@
     "将 V1 项目依赖锁定到 openxiangda@1.0.271 或运行同代 update install。",
     "对待发布变更重新生成 mainline release bundle，或至少重新执行 sdd verify --changed --stage prepublish。",
     "确认 legacy 计划中的 workspace publish 只包含 pages/*，Form 使用 resource publish form-setting 单独暂存。",
+    "自定义 legacy 页面发布脚本必须遵守 OPENXIANGDA_PAGE_STAGE_ONLY=1，并通过当前包内 CLI 登记 staged PageRelease。",
     "继续通过 release publish 执行一次性 Root finalize，不要顺序激活 Form、Backend 或 Page。"
   ],
   "knownLimitations": [

@@ -11,8 +11,11 @@ const {
   releasePlanHash,
 } = require('../lib/release-plan');
 const {
+  assertLegacyPageReleaseCoverage,
   assertReleasePublishAdoptionFlags,
   assertReleasePublishAdoptionScope,
+  assertReleasePublishManifestReplacementFlags,
+  assertReleasePublishManifestReplacementScope,
   buildResourceManifestSddTargets,
   decorateEnvironmentReleaseSteps,
 } = require('../lib/cli');
@@ -131,6 +134,31 @@ assert.match(
   legacyPageStage.command,
   /--only pages\/mobile-booking,pages\/operation-matrix,pages\/piano-room-admin/,
 );
+assert.equal(legacyPageStage.stagedKind, 'PageRelease');
+assert.deepEqual(legacyPageStage.env, {
+  OPENXIANGDA_PAGE_STAGE_ONLY: '1',
+});
+assert.doesNotThrow(() =>
+  assertLegacyPageReleaseCoverage(legacyPageStage, {
+    kind: 'PageRelease',
+    metadata: {
+      selectedPageCodes: [
+        'piano-room-admin',
+        'mobile-booking',
+        'operation-matrix',
+      ],
+    },
+  }),
+);
+assert.throws(
+  () =>
+    assertLegacyPageReleaseCoverage(legacyPageStage, {
+      kind: 'PageRelease',
+      metadata: { selectedPageCodes: ['piano-room-admin'] },
+    }),
+  error => error?.code === 'PAGE_RELEASE_STAGE_SCOPE_MISMATCH',
+  'the last one-page stage must not satisfy a multi-page release plan',
+);
 assert.doesNotMatch(
   legacyPageStage.command,
   /forms\//,
@@ -140,6 +168,16 @@ assert.equal(
   legacyMixedSteps.filter(step => step.id === 'app-finalize').length,
   1,
   'legacy mixed releases must activate all immutable children once',
+);
+assert.deepEqual(
+  buildWorkspaceReleaseSteps(
+    { pages: ['mobile-booking'] },
+    'legacy',
+    'zju-itservice',
+    'page-only-root-release',
+  ).map(step => step.id),
+  ['workspace-publish', 'app-finalize'],
+  'legacy release publish must stage and root-finalize even a page-only plan',
 );
 const workflowSteps = buildWorkspaceReleaseSteps(
   { workflows: ['approval_flow'] },
@@ -395,6 +433,70 @@ assert.throws(
     ),
   error => error?.code === 'RELEASE_PUBLISH_ADOPTION_SCOPE_REQUIRED',
   'adoption intent without an exact resource stage must fail before release writes',
+);
+const legacyReplacementFlags = {
+  'replace-manifest': true,
+  reason: 'reviewed exact qfyy backend manifest replacement',
+};
+assert.doesNotThrow(() =>
+  assertReleasePublishManifestReplacementFlags(legacyReplacementFlags),
+);
+const legacyReplacementSteps = buildWorkspaceReleaseSteps(
+  {
+    forms: ['booking-slot-lock'],
+    pages: ['mobile-booking'],
+    functions: ['batch_occupancy_service'],
+  },
+  'legacy',
+  'zju-itservice',
+  'qfyy-legacy-replacement',
+);
+decorateEnvironmentReleaseSteps(
+  legacyReplacementSteps,
+  {
+    profileName: 'zju-itservice',
+    appType: 'APP_QFYY',
+    environmentId: null,
+    targetName: null,
+  },
+  legacyReplacementFlags,
+);
+assert.doesNotThrow(() =>
+  assertReleasePublishManifestReplacementScope(
+    legacyReplacementSteps,
+    legacyReplacementFlags,
+  ),
+);
+assert.match(
+  legacyReplacementSteps.find(step => step.id === 'backend-stage').command,
+  /--replace-manifest --reason 'reviewed exact qfyy backend manifest replacement'/,
+);
+assert.ok(
+  legacyReplacementSteps
+    .filter(step => step.id !== 'backend-stage')
+    .every(step => !step.command.includes('--replace-manifest')),
+  'legacy manifest replacement must not leak outside the exact Backend stage',
+);
+assert.throws(
+  () =>
+    assertReleasePublishManifestReplacementFlags({
+      'replace-manifest': true,
+      reason: 'short',
+    }),
+  error => error?.code === 'RELEASE_PUBLISH_REPLACEMENT_REASON_REQUIRED',
+);
+assert.throws(
+  () =>
+    assertReleasePublishManifestReplacementScope(
+      buildWorkspaceReleaseSteps(
+        { pages: ['mobile-booking'] },
+        'legacy',
+        'zju-itservice',
+        'page-only-replacement',
+      ),
+      legacyReplacementFlags,
+    ),
+  error => error?.code === 'RELEASE_PUBLISH_REPLACEMENT_SCOPE_REQUIRED',
 );
 assert.ok(
   !formBundleSteps.some(step => step.id === 'config-form-permission-group'),
