@@ -144,6 +144,13 @@ const nowMs = () =>
     ? performance.now()
     : Date.now()
 
+const removedDirectNotificationSend = (): Promise<never> =>
+  Promise.reject(
+    new Error(
+      "DIRECT_NOTIFICATION_SEND_REMOVED: 页面不得直接发送通知，请通过 sdk.function.invoke 调用具名 App Function",
+    ),
+  )
+
 let dynamicReadSequence = 0
 const nextDynamicReadNonce = () => {
   dynamicReadSequence = (dynamicReadSequence + 1) % Number.MAX_SAFE_INTEGER
@@ -2701,35 +2708,17 @@ export const createPageSdk = (context: PageContext): PageSdk => {
 
   const notification = {
     sendByType: <T = SendNotificationResult>(
-      params: SendNotificationByTypeParams,
-    ) =>
-      request<T>({
-        path: buildOpenXiangdaAppPath(
-          context,
-          params.appType,
-          "/notifications/send-by-type",
-        ),
-        method: "post",
-        body: {
-          ...params,
-          appType: resolveAppType(context, params.appType),
-        },
-      }),
+      _params: SendNotificationByTypeParams,
+    ): Promise<PageApiResponse<T>> => {
+      void _params
+      return removedDirectNotificationSend()
+    },
     batchSendByType: <T = SendNotificationResult>(
-      params: BatchSendNotificationByTypeParams,
-    ) =>
-      request<T>({
-        path: buildOpenXiangdaAppPath(
-          context,
-          params.appType,
-          "/notifications/batch-send-by-type",
-        ),
-        method: "post",
-        body: {
-          ...params,
-          appType: resolveAppType(context, params.appType),
-        },
-      }),
+      _params: BatchSendNotificationByTypeParams,
+    ): Promise<PageApiResponse<T>> => {
+      void _params
+      return removedDirectNotificationSend()
+    },
     findConfig: <T = unknown>(
       notificationType: string,
       params: { appType?: string; formUuid?: string } = {},
@@ -2770,20 +2759,11 @@ export const createPageSdk = (context: PageContext): PageSdk => {
         },
       }),
     sendDingTalk: <T = SendNotificationResult>(
-      params: SendNotificationByTypeParams,
-    ) =>
-      request<T>({
-        path: buildOpenXiangdaAppPath(
-          context,
-          params.appType,
-          "/notifications/dingtalk/send",
-        ),
-        method: "post",
-        body: {
-          ...params,
-          appType: resolveAppType(context, params.appType),
-        },
-      }),
+      _params: SendNotificationByTypeParams,
+    ): Promise<PageApiResponse<T>> => {
+      void _params
+      return removedDirectNotificationSend()
+    },
     capabilities: <T = unknown>(params: { appType?: string } = {}) =>
       request<T>({
         path: buildOpenXiangdaAppPath(

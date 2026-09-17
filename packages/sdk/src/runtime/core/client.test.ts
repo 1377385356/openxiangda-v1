@@ -1092,7 +1092,7 @@ describe("createPageSdk", () => {
     expect(invokeMock).not.toHaveBeenCalled()
   })
 
-  it("serializes notification helpers through app-scoped OpenXiangda notification endpoints", async () => {
+  it("rejects direct notification sends and keeps read helpers app-scoped", async () => {
     const context = createContextFixture()
     const sdk = createPageSdk(context)
     ;(context.bridge.invoke as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -1103,26 +1103,25 @@ describe("createPageSdk", () => {
       },
     })
 
-    await sdk.notification.sendByType({
-      notificationType: "custom_reminder",
-      recipientId: "user-1",
-      payload: {
-        title: "待处理事项",
-      },
-      channels: ["inapp"],
-    })
+    await expect(
+      sdk.notification.sendByType({
+        notificationType: "custom_reminder",
+        recipientId: "user-1",
+        payload: { title: "待处理事项" },
+      }),
+    ).rejects.toThrow("DIRECT_NOTIFICATION_SEND_REMOVED")
 
-    await sdk.notification.batchSendByType({
-      notificationType: "custom_reminder",
-      recipients: [
-        {
-          recipientId: "user-1",
-          payload: {
-            title: "待处理事项",
+    await expect(
+      sdk.notification.batchSendByType({
+        notificationType: "custom_reminder",
+        recipients: [
+          {
+            recipientId: "user-1",
+            payload: { title: "待处理事项" },
           },
-        },
-      ],
-    })
+        ],
+      }),
+    ).rejects.toThrow("DIRECT_NOTIFICATION_SEND_REMOVED")
 
     await sdk.notification.findConfig("custom_reminder", {
       formUuid: "FORM_001",
@@ -1151,48 +1150,13 @@ describe("createPageSdk", () => {
 
     const invokeMock = context.bridge.invoke as ReturnType<typeof vi.fn>
     expect(invokeMock).toHaveBeenNthCalledWith(1, "transport.request", {
-      body: {
-        appType: "crm",
-        channels: ["inapp"],
-        notificationType: "custom_reminder",
-        payload: {
-          title: "待处理事项",
-        },
-        recipientId: "user-1",
-      },
-      headers: undefined,
-      method: "post",
-      path: "/openxiangda-api/v1/apps/crm/notifications/send-by-type",
-      query: undefined,
-    })
-    expect(invokeMock).toHaveBeenNthCalledWith(
-      2,
-      "transport.request",
-      expect.objectContaining({
-        body: expect.objectContaining({
-          appType: "crm",
-          notificationType: "custom_reminder",
-          recipients: [
-            {
-              payload: {
-                title: "待处理事项",
-              },
-              recipientId: "user-1",
-            },
-          ],
-        }),
-        method: "post",
-        path: "/openxiangda-api/v1/apps/crm/notifications/batch-send-by-type",
-      }),
-    )
-    expect(invokeMock).toHaveBeenNthCalledWith(3, "transport.request", {
       body: undefined,
       headers: undefined,
       method: "get",
       path: "/openxiangda-api/v1/apps/crm/notifications/type-configs/custom_reminder",
       query: "formUuid=FORM_001",
     })
-    expect(invokeMock).toHaveBeenNthCalledWith(4, "transport.request", {
+    expect(invokeMock).toHaveBeenNthCalledWith(2, "transport.request", {
       body: {
         appType: "crm",
         payload: {
@@ -1205,7 +1169,7 @@ describe("createPageSdk", () => {
       path: "/openxiangda-api/v1/apps/crm/notifications/templates/preview",
       query: undefined,
     })
-    expect(invokeMock).toHaveBeenNthCalledWith(5, "transport.request", {
+    expect(invokeMock).toHaveBeenNthCalledWith(3, "transport.request", {
       body: undefined,
       headers: undefined,
       method: "get",
@@ -1213,21 +1177,21 @@ describe("createPageSdk", () => {
       query:
         "page=1&limit=20&readStatus=unread&keyword=%E7%A6%8F%E5%88%A9&templateCode=benefit_reminder",
     })
-    expect(invokeMock).toHaveBeenNthCalledWith(6, "transport.request", {
+    expect(invokeMock).toHaveBeenNthCalledWith(4, "transport.request", {
       body: undefined,
       headers: undefined,
       method: "get",
       path: "/openxiangda-api/v1/apps/crm/notifications/inbox/unread-count",
       query: undefined,
     })
-    expect(invokeMock).toHaveBeenNthCalledWith(7, "transport.request", {
+    expect(invokeMock).toHaveBeenNthCalledWith(5, "transport.request", {
       body: undefined,
       headers: undefined,
       method: "post",
       path: "/openxiangda-api/v1/apps/crm/notifications/inbox/msg%2F1/read",
       query: undefined,
     })
-    expect(invokeMock).toHaveBeenNthCalledWith(8, "transport.request", {
+    expect(invokeMock).toHaveBeenNthCalledWith(6, "transport.request", {
       body: undefined,
       headers: undefined,
       method: "post",
@@ -1252,13 +1216,13 @@ describe("createPageSdk", () => {
         title: "待处理事项",
       },
     })
-    await sdk.notification.sendDingTalk({
-      notificationType: "custom_reminder",
-      recipientId: "user-1",
-      payload: {
-        title: "待处理事项",
-      },
-    })
+    await expect(
+      sdk.notification.sendDingTalk({
+        notificationType: "custom_reminder",
+        recipientId: "user-1",
+        payload: { title: "待处理事项" },
+      }),
+    ).rejects.toThrow("DIRECT_NOTIFICATION_SEND_REMOVED")
 
     const invokeMock = context.bridge.invoke as ReturnType<typeof vi.fn>
     expect(invokeMock).toHaveBeenNthCalledWith(1, "transport.request", {
@@ -1281,20 +1245,7 @@ describe("createPageSdk", () => {
       path: "/openxiangda-api/v1/apps/crm/notifications/dingtalk/preview",
       query: undefined,
     })
-    expect(invokeMock).toHaveBeenNthCalledWith(3, "transport.request", {
-      body: {
-        appType: "crm",
-        notificationType: "custom_reminder",
-        payload: {
-          title: "待处理事项",
-        },
-        recipientId: "user-1",
-      },
-      headers: undefined,
-      method: "post",
-      path: "/openxiangda-api/v1/apps/crm/notifications/dingtalk/send",
-      query: undefined,
-    })
+    expect(invokeMock).toHaveBeenCalledTimes(2)
   })
 
   it("serializes organization helpers through app-scoped endpoints", async () => {

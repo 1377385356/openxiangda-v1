@@ -2931,9 +2931,11 @@ export interface PageSdk {
     ): Promise<PageApiResponse<FunctionInvokeResult<TResult>>>
   }
   notification: {
+    /** @deprecated 页面不得直接发送通知，请改用 sdk.function.invoke 调用具名 App Function。 */
     sendByType<T = SendNotificationResult>(
       params: SendNotificationByTypeParams,
     ): Promise<PageApiResponse<T>>
+    /** @deprecated 页面不得直接批量发送通知，请改用 sdk.function.invoke 调用具名 App Function。 */
     batchSendByType<T = SendNotificationResult>(
       params: BatchSendNotificationByTypeParams,
     ): Promise<PageApiResponse<T>>
@@ -2947,6 +2949,7 @@ export interface PageSdk {
     previewDingTalk<T = DingTalkNotificationPreviewResult>(
       params: PreviewDingTalkNotificationParams,
     ): Promise<PageApiResponse<T>>
+    /** @deprecated 页面不得直接发送钉钉通知，请改用 sdk.function.invoke 调用具名 App Function。 */
     sendDingTalk<T = SendNotificationResult>(
       params: SendNotificationByTypeParams,
     ): Promise<PageApiResponse<T>>

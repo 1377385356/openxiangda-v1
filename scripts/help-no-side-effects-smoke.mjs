@@ -56,6 +56,24 @@ const runCli = (args, options = {}) => {
   return { context, result }
 }
 
+const runRejectedCli = (args, expectedText) => {
+  const context = makeEnv()
+  const result = spawnSync(process.execPath, [cli, ...args], {
+    cwd: repoRoot,
+    env: context.env,
+    encoding: "utf8",
+  })
+  assert(result.status !== 0, `${args.join(" ")} unexpectedly succeeded`)
+  assert(
+    `${result.stderr}\n${result.stdout}`.includes(expectedText),
+    `${args.join(" ")} did not report ${expectedText}`,
+  )
+  assert(
+    !fs.existsSync(path.join(context.home, ".openxiangda")),
+    `${args.join(" ")} read or created OpenXiangda configuration before rejection`,
+  )
+}
+
 try {
   {
     const { context } = runHelp(["skill", "install", "--help"], "openxiangda skill install|status")
@@ -206,6 +224,13 @@ try {
   ]) {
     const { context } = runHelp(args, expected)
     assert(!fs.existsSync(path.join(context.home, ".openxiangda")), `${args.join(" ")} created user config`)
+  }
+
+  for (const subcommand of ["send", "batch-send", "dingding-send"]) {
+    runRejectedCli(
+      ["notification", subcommand, "reservation_reminder"],
+      "DIRECT_NOTIFICATION_SEND_REMOVED",
+    )
   }
 
   console.log("help no-side-effects smoke passed")

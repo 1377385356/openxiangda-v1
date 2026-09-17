@@ -1,8 +1,8 @@
 # Notification Resources
 
-Use notification resources when a page, workflow, or automation needs reusable message templates.
+Use notification resources when an App Function, workflow, or automation needs reusable message templates.
 
-AI generation rule: declare notification resources first, then call `sdk.notification` in code pages or `ctx.notification` in JS_CODE. Do not hardcode `/api/notification-config/*` or store channel credentials in source.
+AI generation rule: declare notification resources first, then send only from trusted runtime code through `ctx.notification`. Code pages call a named App Function with a business identifier through `sdk.function.invoke`; they never choose effective recipients, rendered content, or channels. Do not hardcode `/api/notification-config/*` or store channel credentials in source.
 
 ## Resource Files
 
@@ -135,21 +135,35 @@ Standard card payload variables include `title`, `lastMessage`, `content`, `cont
 
 ## Runtime Calls
 
-Code pages:
+Code pages invoke a named business action. Pass business identifiers, not an
+effective recipient, rendered message, or channel list:
 
 ```ts
-await sdk.notification.sendByType({
-  notificationType: "reservation_reminder",
-  recipientId: userId,
-  payload: {
-    title: "预约提醒",
-    instrumentName,
-    startTime,
-  },
+await sdk.function.invoke("send_reservation_reminder", {
+  input: { reservationId },
 });
 ```
 
-DingTalk-specific helpers are available when the caller wants to inspect or force the DingTalk channel:
+The App Function checks the operator and current reservation state, resolves the
+recipient and template variables from authoritative data, then sends through the
+trusted runtime bridge:
+
+```ts
+export default async function sendReservationReminder(ctx) {
+  const reservation = await loadAuthorizedReservation(ctx.input.reservationId, ctx);
+  await ctx.notification.sendByType({
+    notificationType: "reservation_reminder",
+    recipientId: reservation.ownerUserId,
+    payload: {
+      title: "预约提醒",
+      instrumentName: reservation.instrumentName,
+      startTime: reservation.startTime,
+    },
+  });
+}
+```
+
+DingTalk-specific read and preview helpers remain available to pages:
 
 ```ts
 const capabilities = await sdk.notification.capabilities();
@@ -161,13 +175,6 @@ const preview = await sdk.notification.previewDingTalk({
   },
 });
 
-await sdk.notification.sendDingTalk({
-  notificationType: "reservation_reminder",
-  recipientId: userId,
-  payload: {
-    title: "预约提醒",
-  },
-});
 ```
 
 User-facing in-app message centers should read the platform inbox instead of
@@ -198,12 +205,10 @@ openxiangda notification preview reservation_reminder --body-json '{"payload":{"
 openxiangda notification capabilities --json
 openxiangda notification dingding-preview reservation_reminder --body-json '{"payload":{"title":"测试"}}'
 openxiangda notification dingding-preview --template-code reservation_reminder --body-json '{"payload":{"title":"测试"}}'
-openxiangda notification dingding-send reservation_reminder --body-json '{"recipientId":"USER_ID","payload":{"title":"测试"}}' --force
-openxiangda notification send reservation_reminder --body-json '{"recipientId":"USER_ID","payload":{"title":"测试"}}' --force
-openxiangda notification batch-send reservation_reminder --body-json '{"recipients":[{"recipientId":"USER_ID","payload":{"title":"测试"}}]}' --force
+openxiangda function invoke send_reservation_reminder --body-json '{"input":{"reservationId":"RESERVATION_ID"}}'
 ```
 
-Automation or workflow JS_CODE:
+App Function, Automation, or workflow JS_CODE:
 
 ```ts
 export default async function notify(ctx) {

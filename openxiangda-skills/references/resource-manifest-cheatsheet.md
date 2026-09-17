@@ -552,19 +552,17 @@ const stats = await sdk.dataView.stats("ticket_stats_by_customer", {
 }
 ```
 
-页面调用：
+页面调用具名 App Function，只传业务标识：
 
 ```ts
-await sdk.notification.sendByType({
-  notificationType: "reservation_reminder",
-  recipientId: userId,
-  payload: { title: "预约提醒", instrumentName, startTime },
+await sdk.function.invoke("send_reservation_reminder", {
+  input: { reservationId },
 });
 ```
 
-JS_CODE 调用：`ctx.notification.sendByType({ ... })`。允许的 channels：`inapp` / `email` / `dingding` / `wechat` / `thirdparty_todo`。完整规则见 [`notifications.md`](notifications.md)。
+App Function / Workflow / Automation / JS_CODE 在完成业务鉴权并解析接收人后调用：`ctx.notification.sendByType({ ... })`。允许的 channels：`inapp` / `email` / `dingding` / `wechat` / `thirdparty_todo`。完整规则见 [`notifications.md`](notifications.md)。
 
-钉钉卡片预览/发送：`sdk.notification.previewDingTalk({ notificationType, payload })`、`sdk.notification.sendDingTalk({ notificationType, recipientId, payload })`；CLI 为 `openxiangda notification dingding-preview` 和 `openxiangda notification dingding-send --force`。
+页面可做钉钉卡片预览：`sdk.notification.previewDingTalk({ notificationType, payload })`；CLI 为 `openxiangda notification dingding-preview`。实际发送必须位于具名 App Function 等可信运行时中。
 
 ## 4. App Function — `src/resources/functions/<functionCode>.json` + `src/functions/<functionCode>/index.ts`
 

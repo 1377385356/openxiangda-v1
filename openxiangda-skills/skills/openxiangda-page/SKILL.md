@@ -44,7 +44,7 @@ openxiangda workspace publish --profile <name> --page <pageCode>
 - ❌ Raw native form controls in AI-authored page code (`<input>`, `<select>`, `<textarea>`, file inputs, hand-written pickers/uploaders). Use platform components or `antd` / `antd-mobile`.
 - ❌ Embed a single `FormProvider` field component temporarily; navigate to a full standard form page or render a complete `StandardFormPage` instead.
 - ❌ Reuse one form UI for both PC and mobile without verifying overlay / picker / bottom-sheet behavior on both viewports.
-- ❌ Hardcode notification or platform API URLs; use `openxiangda/runtime` and `src/resources/notifications/` declarations.
+- ❌ Send notifications directly from a page or hardcode notification/platform API URLs. Pages invoke a named App Function with business identifiers; trusted runtime code uses `ctx.notification` and `src/resources/notifications/` declarations.
 
 ## CLI Flow
 
@@ -133,7 +133,7 @@ Read these references only when editing page code:
 - Store live `pageId`, `routeKey`, and `legacyFormUuid` under the current profile only.
 - Use `openxiangda/runtime` for platform data access instead of hardcoding backend URLs in page code.
 - 家校关系必须通过 `sdk.organization.schoolContact` / `ctx.organization.schoolContact` 读取；班主任班级使用 `teachers.list` 的 `isHeadTeacher`，不要用全局角色推断具体班级，也不要直连钉钉、查询系统表或用同班成员推断亲属关系。
-- For reminders, alerts, and business messages, declare `src/resources/notifications/` first and call `sdk.notification`; do not hardcode notification API URLs.
+- For reminders, alerts, and business messages, declare `src/resources/notifications/` first. Pages call a named App Function through `sdk.function.invoke`; the function authorizes the business action, derives recipients and variables, and sends through trusted `ctx.notification`. Do not hardcode notification API URLs or pass effective recipients/content/channels from the page.
 - For backend business logic shared by pages, automations, or workflows, declare an App Function and call `sdk.function.invoke`; do not duplicate the same multi-form query/connector/notification orchestration in page code.
 - Before hand-writing mature UI behavior, consult `references/component-guide.md` and use established libraries: platform components for platform data fields, antd/antd-mobile for controls and overlays, ECharts for charts, GSAP for complex animation timelines, and maintained packages such as dnd-kit for drag/drop. Do not rebuild mature controls with raw DOM/native inputs.
 - Named imports from `@ant-design/icons` are supported by the `openxiangda` workspace build proxy, which enumerates icon module exports at runtime.

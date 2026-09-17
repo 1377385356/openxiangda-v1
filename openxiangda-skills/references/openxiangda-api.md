@@ -344,38 +344,16 @@ Requires Bearer token. Updates menu sorting and parent relationships in batch.
 
 ### POST `/apps/:appType/notifications/send-by-type`
 
-Requires Bearer token. Sends a notification in the current app scope.
-Each returned message can include `deliveryMeta` with provider message id, outTrackId, card template id, fallback usage, and provider error summary.
-
-```json
-{
-  "notificationType": "reservation_reminder",
-  "recipientId": "user-id",
-  "payload": {
-    "title": "预约提醒"
-  },
-  "channels": ["inapp"]
-}
-```
+Removed. Always returns HTTP/envelope `410` with
+`DIRECT_NOTIFICATION_SEND_REMOVED`. Pages must invoke a named App Function;
+trusted runtime code sends through `ctx.notification` after business
+authorization and recipient resolution.
 
 ### POST `/apps/:appType/notifications/batch-send-by-type`
 
-Requires Bearer token. Sends one notification type to multiple recipients.
-
-```json
-{
-  "notificationType": "reservation_reminder",
-  "recipients": [
-    {
-      "recipientId": "user-id",
-      "payload": {
-        "title": "预约提醒"
-      },
-      "channels": ["inapp"]
-    }
-  ]
-}
-```
+Removed. Always returns HTTP/envelope `410` with
+`DIRECT_NOTIFICATION_SEND_REMOVED`. Batch recipient selection belongs in a
+bounded, authorized App Function, Workflow, Automation, or trusted JS_CODE.
 
 ### GET `/apps/:appType/notifications/templates`
 
@@ -426,7 +404,9 @@ or a direct DingTalk config:
 
 ### POST `/apps/:appType/notifications/dingtalk/send`
 
-Requires Bearer token. Sends the resolved `notificationType` through the DingTalk channel only. The CLI command is `openxiangda notification dingding-send <notificationType> --body-json '{"recipientId":"USER_ID","payload":{"title":"测试"}}' --force`.
+Removed. Always returns HTTP/envelope `410` with
+`DIRECT_NOTIFICATION_SEND_REMOVED`. The CLI command is also removed; use
+`openxiangda function invoke <functionCode>` for an authorized business action.
 
 ### GET `/apps/:appType/notifications/type-configs`
 
